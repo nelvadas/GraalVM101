@@ -528,28 +528,194 @@ CONTAINER ID   IMAGE                                          COMMAND           
 
 #### Build a native image 
 From Oracle linux station, build a new native image. 
+```sh
+$ mvn clean package -Pnative
+...
+GraalVM Native Image: Generating 'BondPricing' (executable)...
+========================================================================================================================
+
+[1/7] Initializing...                                                                                   (14.1s @ 0.20GB)
+ Version info: 'GraalVM 22.2.0 Java 11 EE'
+ Java version info: '11.0.16+11-LTS-jvmci-22.2-b05'
+ C compiler: gcc (redhat, x86_64, 8.5.0)
+ Garbage collector: Serial GC
+Warning: Could not register complete reflection metadata for org.springframework.validation.beanvalidation.SpringValidatorAdapter$ViolationFieldError. Reason(s): java.lang.NoClassDefFoundError: javax/validation/Validator
+[2/7] Performing analysis...  [*********]                                                              (122.5s @ 2.24GB)
+  14,930 (90.53%) of 16,491 classes reachable
+  23,717 (69.67%) of 34,041 fields reachable
+  78,092 (65.56%) of 119,121 methods reachable
+     856 classes,   153 fields, and 4,014 methods registered for reflection
+      69 classes,    88 fields, and    56 methods registered for JNI access
+       5 native libraries: dl, pthread, rt, stdc++, z
+[3/7] Building universe...                                                                              (15.6s @ 1.55GB)
+[4/7] Parsing methods...      [****]                                                                    (19.4s @ 1.39GB)
+[5/7] Inlining methods...     [***]                                                                      (6.9s @ 1.87GB)
+[6/7] Compiling methods...    [[6/7] Compiling methods...    [*****************]                                                      (299.2s @ 1.29GB)
+[7/7] Creating image...                                                                                  (9.9s @ 1.86GB)
+  36.82MB (57.18%) for code area:    44,615 compilation units
+  27.03MB (41.97%) for image heap:  351,708 objects and 358 resources
+ 559.02KB ( 0.85%) for other data
+  64.39MB in total
+------------------------------------------------------------------------------------------------------------------------
+Top 10 packages in code area:                               Top 10 object types in image heap:
+   3.07MB com.oracle.svm.core.code                             7.69MB byte[] for code metadata
+   1.57MB sun.security.ssl                                     3.29MB byte[] for java.lang.String
+   1.29MB java.util                                            2.99MB byte[] for embedded resources
+ 865.01KB com.sun.crypto.provider                              2.60MB java.lang.Class
+ 685.25KB java.util.concurrent                                 2.48MB java.lang.String
+ 673.54KB org.apache.tomcat.util.net                           2.25MB byte[] for general heap data
+ 638.37KB org.apache.coyote.http2                            897.66KB byte[] for reflection metadata
+ 633.08KB java.lang                                          699.84KB com.oracle.svm.core.hub.DynamicHubCompanion
+ 622.60KB org.apache.catalina.core                           453.91KB java.util.HashMap$Node
+ 536.46KB sun.security.x509                                  423.72KB c.o.svm.core.hub.DynamicHub$ReflectionMetadata
+  26.02MB for 626 more packages                                3.22MB for 2985 more object types
+------------------------------------------------------------------------------------------------------------------------
+                       19.0s (3.8% of total time) in 106 GCs | Peak RSS: 3.88GB | CPU load: 1.93
+------------------------------------------------------------------------------------------------------------------------
+Produced artifacts:
+ /home/opc/GraalVM101/BondPricing/target/BondPricing (executable)
+ /home/opc/GraalVM101/BondPricing/target/BondPricing.build_artifacts.txt (txt)
+========================================================================================================================
+Finished generating 'BondPricing' in 8m 17s.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 18:48 min
+[INFO] Finished at: 2022-09-19T19:11:17Z
+[INFO] ------------------------------------------------------------------------
+[opc@enono-workstation-01 BondPricing]$ ls -rtlh target/
+total 158M
+drwxrwxr-x. 3 opc opc   25 Sep 19 18:52 generated-sources
+drwxrwxr-x. 3 opc opc   35 Sep 19 18:52 maven-status
+drwxrwxr-x. 3 opc opc   30 Sep 19 18:52 generated-test-sources
+drwxrwxr-x. 3 opc opc   24 Sep 19 18:52 generated-runtime-test-sources
+drwxrwxr-x. 5 opc opc   69 Sep 19 18:53 test-classes
+drwxrwxr-x. 2 opc opc  121 Sep 19 18:53 surefire-reports
+drwxrwxr-x. 2 opc opc   63 Sep 19 18:53 test-ids
+-rwxrwxr-x. 1 opc opc  75M Sep 19 19:02 native-tests
+-rw-rw-r--. 1 opc opc   27 Sep 19 19:02 native-tests.build_artifacts.txt
+drwxrwxr-x. 2 opc opc   36 Sep 19 19:02 native-test-reports
+drwxrwxr-x. 3 opc opc   24 Sep 19 19:02 generated-runtime-sources
+drwxrwxr-x. 5 opc opc   74 Sep 19 19:02 classes
+drwxrwxr-x. 2 opc opc   28 Sep 19 19:02 maven-archiver
+-rw-rw-r--. 1 opc opc 105K Sep 19 19:02 BondPricing-0.0.1-SNAPSHOT.jar
+-rw-rw-r--. 1 opc opc  20M Sep 19 19:02 BondPricing-0.0.1-SNAPSHOT-exec.jar
+-rwxrwxr-x. 1 opc opc  65M Sep 19 19:11 BondPricing
+-rw-rw-r--. 1 opc opc   26 Sep 19 19:11 BondPricing.build_artifacts.txt
+[opc@enono-workstation-01 BondPricing]$
+```
 
 #### Optimizing package size
+Package size can be optimized using upx 
+
+```sh
+$curl --location --output upx-3.96-amd64_linux.tar.xz "https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux.tar.xz"
+$tar -xJf upx-3.96-amd64_linux.tar.xz
+$sudo mv upx-3.96-amd64_linux/upx /bin/
+```
+
+
+Reduce the package size with upx util
 
 ```sh 
-$ $ upx BondPricing
+$ [opc@enono-workstation-01 target]$ upx -o BondPricing.upx BondPricing
                        Ultimate Packer for eXecutables
                           Copyright (C) 1996 - 2020
 UPX 3.96        Markus Oberhumer, Laszlo Molnar & John Reiser   Jan 23rd 2020
 
         File size         Ratio      Format      Name
    --------------------   ------   -----------   -----------
-  67243528 ->  25772048   38.33%   macho/amd64   BondPricing
+  67348096 ->  22634004   33.61%   linux/amd64   BondPricing.upx
 
 Packed 1 file.
 ```
-Native image reduce from 64M to 25M
+Native image reduce from <b>65M</b> to <b>22M</b>
 
 
 ### Embark the compressed native image in the container
 Build a new docker image
 
 ```sh
-cd BondPricing
-docker build -f docker/Dockerfile.native.basic -t nelvadas/bondpricing:1.0-native-basic .
+$ docker build -f docker/Dockerfile.native.basic -t nelvadas/bondpricing:1.0-native-basic .
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+STEP 1/4: FROM docker.io/oraclelinux:8-slim
+STEP 2/4: EXPOSE 8080
+--> Using cache 8981b8fbcafd16e8c6094ffd0a1f965e95ab741b4309d95a12e88d95c20dd961
+--> 8981b8fbcaf
+STEP 3/4: COPY ../target/BondPricing.upx ./app
+--> Using cache c7b5c603c83ce1d401f00656eebaee6f735ad03d3f7e99ad8b5e99aac75114f3
+--> c7b5c603c83
+STEP 4/4: ENTRYPOINT ["/app"]
+--> Using cache b16f2016d9be5477ec7d665bb0ed7ba65815de6323d3f5d6bfc83cd4776f7be6
+COMMIT nelvadas/bondpricing:1.0-native-basic
+--> b16f2016d9b
+Successfully tagged localhost/nelvadas/bondpricing:1.0-native-basic
 ```
+
+Run a container built on top of Native Image executable 
+
+```sh 
+[opc@enono-workstation-01 BondPricing]$ docker run -d -p 7070:8080 nelvadas/bondpricing:1.0-native-basic
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+c91348f823e5de9b44b93f7e8539585fa62891d90cfa949e6193481c5a672afa
+[opc@enono-workstation-01 BondPricing]$ docker ps
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+CONTAINER ID  IMAGE                                            COMMAND     CREATED        STATUS            PORTS                   NAMES
+c91348f823e5  localhost/nelvadas/bondpricing:1.0-native-basic              2 seconds ago  Up 3 seconds ago  0.0.0.0:7070->8080/tcp  epic_leavitt
+[opc@enono-workstation-01 BondPricing]$ docker logs c9
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+2022-09-19 19:25:29.243  INFO 1 --- [           main] o.s.nativex.NativeListener               : AOT mode enabled
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v2.7.3)
+
+2022-09-19 19:25:29.244  INFO 1 --- [           main] c.o.graalvm.demo.BondPricingApplication  : Starting BondPricingApplication v0.0.1-SNAPSHOT using Java 11.0.16 on c91348f823e5 with PID 1 (/app started by root in /)
+2022-09-19 19:25:29.244  INFO 1 --- [           main] c.o.graalvm.demo.BondPricingApplication  : No active profile set, falling back to 1 default profile: "default"
+2022-09-19 19:25:29.254  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2022-09-19 19:25:29.254  INFO 1 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2022-09-19 19:25:29.254  INFO 1 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.65]
+2022-09-19 19:25:29.257  INFO 1 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2022-09-19 19:25:29.257  INFO 1 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 13 ms
+2022-09-19 19:25:29.259  WARN 1 --- [           main] i.m.c.i.binder.jvm.JvmGcMetrics          : GC notifications will not be available because MemoryPoolMXBeans are not provided by the JVM
+2022-09-19 19:25:29.282  INFO 1 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
+2022-09-19 19:25:29.284  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2022-09-19 19:25:29.284  INFO 1 --- [           main] c.o.graalvm.demo.BondPricingApplication  : Started BondPricingApplication in 0.048 seconds (JVM running for 0.049)
+```
+Application start very fast. <b>~ (0,048seco~d)</b>
+
+The package size produced with the native image build is leaner
+
+```sh 
+[opc@enono-workstation-01 BondPricing]$ docker images | grep bond
+localhost/nelvadas/bondpricing                1.0-jit-temurin-11.0.16  6adc009e52ad  46 seconds ago  960 MB
+localhost/nelvadas/bondpricing                1.0-native-basic         b16f2016d9be  4 minutes ago   130 MB
+[opc@enono-workstation-01 BondPricing]$
+```
+
+The docker images are available as packages on the current repository 
+```sh
+docker pull ghcr.io/nelvadas/bondpricing:1.0-native-basic
+docker pull ghcr.io/nelvadas/bondpricing:1.0-jit-temurin-11.0.16
+```
+
+### Graphana Live Metrics dashboard
+:todo:
+
+
+
+
+
+# More Readings and Workshops
+
+- [GraalVM HelloWorld](https://github.com/nelvadas/graalvm-helloworld-nativeimage)
+- [GraalVM Native Image](https://github.com/nelvadas/Native-Image-Workshop)
+- [GraalVM & Spring Boot Native Image Workshop](https://github.com/nelvadas/GraalVM-SpringBoot-Labs)
+- [GraalVM Polyglot Workshop](https://github.com/nelvadas/GraalVM-Polyglot-Labs)
+- [Accelerating Apache Spark with GraalVM](https://github.com/nelvadas/spark-with-graalvm)
+- [GraalVM and Serverless](https://github.com/nelvadas/graalvm-serverless)
+- [Accelerating Weblogic with GraalVM](https://github.com/nelvadas/graalvm-weblogic-jaxrs-demo)

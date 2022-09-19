@@ -53,6 +53,7 @@
 							<BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
 						</env>
 					</image>
+					<mainClass>com.oracle.graalvm.demo.BondPricingApplication</mainClass>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -73,6 +74,11 @@
 						</goals>
 					</execution>
 				</executions>
+				<!-- Manifest Configuration -->
+				<configuration>
+					<mainClass>com.oracle.graalvm.demo.BondPricingApplication</mainClass>
+				</configuration>
+				<!-- Manifest configuration -->
 			</plugin>
 		</plugins>
 	</build>
@@ -113,7 +119,7 @@
 			</dependencies>
 			<build>
 				<plugins>
-					
+
 
 					<plugin>
 						<groupId>org.graalvm.buildtools</groupId>

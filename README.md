@@ -10,9 +10,18 @@ GraalVM 101: <i>Practical Workshop to Get Started with GraalVM Enterprise Editio
  4. [GraalVM Native Image : Faster,Leaner ](#performance-boot-with-graalvm-nativeimage)
  4. [Cloud Native Deployments with GraalVM Native Image](#cloud-native-devployment)
 
+# Tooling and requirements
+
+- Java Runtimes: GraalVM + OpenJDK
+- [Apache benchmark](https://httpd.apache.org/docs/2.4/programs/ab.html)
+- [hey](https://github.com/rakyll/hey)
+- [Maven](https://maven.apache.org/)
+- [upx](https://github.com/upx/upx/releases)
+- [Docker/Podman](https://docs.docker.com/engine/)
+
 ## Installing GraalVM EE
 
-Use the following docs/links to install GraalVM 22.2+
+Use the following docs/links to install GraalVM Enterprise 22.2+
 
 * [GraalVM Installation instructions](https://docs.oracle.com/en/graalvm/enterprise/22/docs/getting-started/#install-graalvm-enterprise)
 * [Oracle Linux /OCI](https://docs.oracle.com/en/graalvm/enterprise/22/docs/getting-started/#install-graalvm-enterprise)
@@ -20,7 +29,9 @@ Use the following docs/links to install GraalVM 22.2+
 
 ## Bond Pricing Spring Boot API
 
-A [Bond](<https://www.investopedia.com/terms/b/bond.asp>) is a financial instrument that represent a loan made by an investor to a borrower that pays investor a fixed rate of return over a specific timeframe(Maturity). 
+A [Bond](<https://www.investopedia.com/terms/b/bond.asp>) is a financial instrument that represent a loan made by an investor to a borrower that pays investor a fixed rate of return over a specific timeframe(Maturity).
+At the end of the maturity period the Principal amount is paid back to the investor. 
+
 
 In this section, you will have to create a  Bond Pricing SpringBoot API that compute the selling price of a bond using the [Present Value Model](https://en.wikipedia.org/wiki/Bond_valuation#Present_value_approach) with
 
@@ -30,6 +41,7 @@ Where:
 * `C` is a coupon, periodic interest received by the lender.
 `C = Contractual  * Face Value of the bond `
 * `r` is the market yield to maturity
+* `T` represents the number of payment to received/ years( Maturity Term)
 * [More about the formular](https://www.simtrade.fr/blog_simtrade/how-compute-present-value-asset/)
 
 1. Use spring initialzr to create the following project
@@ -44,8 +56,12 @@ Java:  <b>11</b><br>
 
 
 
-2. Download the project, unzip and open it with you favorite Code editor.
-then add a PricerController Class as describeb below.
+2. Download the project, unzip it and open the directory in your favorite code editor.
+Add a `com.oracle.graalvm.demo.PricerController` class as describeb below.
+
+- The conroller has two endpoints
+- `/` return a welcome text
+- `/price/{name}/{principal}/{maturity}?yield=xx&interestRate=y` used to compute the bond fair price
 
 ```java
 package com.oracle.graalvm.demo;
@@ -240,7 +256,7 @@ Percentage of the requests served within a certain time (ms)
 
 
 
-### Other Java JIT 
+### Non GraalVM Java JIT Compiler
 
 In the following section we restart the BondPricer with a default JIT compiler, and  send the same load( 10000 pricing  requests)  with Apache Benchmark and capture the performance Metrics.
 use the `-XX:-UseJVMCICompiler` JVM option to fall back of the default JIT compiler or restart your application with an openJDK 11 for eg.
@@ -482,7 +498,58 @@ $ ./target/BondPricing
 2022-09-19 15:42:35.762  INFO 15914 --- [           main] c.o.graalvm.demo.BondPricingApplication  : Started BondPricingApplication in 0.134 seconds (JVM running for 0.136)
 
 ```
-The native image build start very fast <b>0.134s<b> compared to 2 seconds in the JIT mode)
+The native image build starts very fast <b><span style="color:green">0.134s</span></b> compared to <span style="color:orange">2 seconds </span>2 in tthe [JIT mode](#graalvm-jit)
 
 
 ## Cloud Native Devployment
+ 
+
+### The Old way
+```sh 
+$ cd BondPricing
+$ docker build -f docker/Dockerfile.jit -t nelvadas/bondpricing:1.0-jit-temurin-11.0.16 .
+```
+Image size 
+
+```sh 
+$ docker images | grep bondpricing
+nelvadas/bondpricing               1.0-jit-temurin-11.0.16         a203dd86e670   5 minutes ago    972MB
+```
+Application up and Running 
+
+```sh 
+$ docker run -p 7070:8080 -d docker.io/nelvadas/bondpricing:1.0-jit-temurin-11.0.16
+5f0d75a17a17bcc4c70e68c6c3cbe6261ba909d5e8822e9a12020549a745ccb8
+nono-mac:BondPricing nono$ docker ps
+CONTAINER ID   IMAGE                                          COMMAND                  CREATED         STATUS         PORTS                    NAMES
+5f0d75a17a17   nelvadas/bondpricing:1.0-jit-temurin-11.0.16   "/root/.sdkman/candi…"   3 seconds ago   Up 2 seconds   0.0.0.0:7070->8080/tcp   youthful_mestorf
+```
+### Natime image patterns
+
+#### Build a native image 
+From Oracle linux station, build a new native image. 
+
+#### Optimizing package size
+
+```sh 
+$ $ upx BondPricing
+                       Ultimate Packer for eXecutables
+                          Copyright (C) 1996 - 2020
+UPX 3.96        Markus Oberhumer, Laszlo Molnar & John Reiser   Jan 23rd 2020
+
+        File size         Ratio      Format      Name
+   --------------------   ------   -----------   -----------
+  67243528 ->  25772048   38.33%   macho/amd64   BondPricing
+
+Packed 1 file.
+```
+Native image reduce from 64M to 25M
+
+
+### Embark the compressed native image in the container
+Build a new docker image
+
+```sh
+cd BondPricing
+docker build -f docker/Dockerfile.native.basic -t nelvadas/bondpricing:1.0-native-basic .
+```

@@ -1,0 +1,8 @@
+# The deployment Image
+FROM docker.io/oraclelinux:8-slim
+
+EXPOSE 8080
+
+# Copy the native executable into the containers
+COPY ../target/BondPricing .
+ENTRYPOINT ["/BondPricing"]

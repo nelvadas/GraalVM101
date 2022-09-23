@@ -17,6 +17,7 @@
 		<java.version>11</java.version>
 		<repackage.classifier/>
 		<spring-native.version>0.12.1</spring-native.version>
+		<main.class>com.oracle.graalvm.demo.BondPricingApplication</main.class>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -53,7 +54,7 @@
 							<BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
 						</env>
 					</image>
-					<mainClass>com.oracle.graalvm.demo.BondPricingApplication</mainClass>
+					<mainClass>${main.class}</mainClass>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -76,7 +77,7 @@
 				</executions>
 				<!-- Manifest Configuration -->
 				<configuration>
-					<mainClass>com.oracle.graalvm.demo.BondPricingApplication</mainClass>
+					<mainClass>${main.class}</mainClass>
 				</configuration>
 				<!-- Manifest configuration -->
 			</plugin>
@@ -142,6 +143,10 @@
 								</goals>
 							</execution>
 						</executions>
+						<configuration>
+							<mainClass>${main.class}</mainClass>
+							<skipNativeTests>true</skipNativeTests>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>

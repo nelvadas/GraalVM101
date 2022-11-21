@@ -1,0 +1,17 @@
+micronaut:
+  application:
+    name: mnBondPricing
+  metrics:
+    enabled: true
+    export:
+      prometheus:
+        enabled: true
+        descriptions: true
+        step: PT1M
+endpoints:
+  prometheus:
+    sensitive: false
+netty:
+  default:
+    allocator:
+      max-order: 3

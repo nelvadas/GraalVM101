@@ -1,4 +1,4 @@
-# GraalVM 101
+# GraalVM 101 - Spring Boot + Micronaut
 GraalVM 101: <i>Practical Workshop to Get Started with GraalVM Enterprise Edition.</i>
 
 
@@ -8,7 +8,8 @@ GraalVM 101: <i>Practical Workshop to Get Started with GraalVM Enterprise Editio
  2. [Creating a simple Spring Boot Bond Princing API](#bond-pricing-spring-boot-api)
  3. [GraalVM JIT to boost Throughputs](#performance-boot-with-graalvm-jit-compiler)
  4. [GraalVM Native Image : Faster,Leaner ](#performance-boot-with-graalvm-nativeimage)
- 4. [Cloud Native Deployments with GraalVM Native Image](#cloud-native-devployment)
+ 5. [Cloud Native Deployments with GraalVM Native Image](#cloud-native-devployment)
+ 6. [Micronaut with GraalVM Native Image](./02-micronaut/)
 
 # Tooling and requirements
 

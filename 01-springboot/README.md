@@ -1,4 +1,4 @@
-# GraalVM 101
+# GraalVM 101 - Spring Boot 
 GraalVM 101: <i>Practical Workshop to Get Started with GraalVM Enterprise Edition.</i>
 
 

@@ -3,6 +3,21 @@ micronaut:
     name: mnBondPricing
   metrics:
     enabled: true
+    binders:
+      files:
+        enabled: true
+      jdbc:
+        enabled: true
+      jvm:
+        enabled: true
+      logback:
+        enabled: true
+      processor:
+        enabled: true
+      uptime:
+        enabled: true
+      web:
+        enabled: true
     export:
       prometheus:
         enabled: true

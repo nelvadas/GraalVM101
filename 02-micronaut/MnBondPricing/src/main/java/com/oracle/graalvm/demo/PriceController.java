@@ -5,7 +5,7 @@ import io.micronaut.http.annotation.*;
 
 import java.util.stream.Stream;
 
-@Controller
+@Controller("/price")
 public class PriceController {
 
 	@Get("/")
@@ -25,7 +25,7 @@ public class PriceController {
 	 * curl 'localhost:8080/price/graalvm/100/10/?yield=0.03&interestRate=0.02'
 	 * 91,470
 	 */
-	@Get("/price/{name}/{principal}/{maturity}/{")
+	@Get("/{name}/{principal}/{maturity}")
 	String price (
 			@PathVariable(name = "name") String name,
 			@PathVariable(value ="principal" ) double principal,

@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    kubernetes.io/metadata.name: ms-dev-ce
+    istio-injection: enabled
+    verrazzano-managed: "true"
+  name: ms-dev-ce
+---
+apiVersion: core.oam.dev/v1alpha2
+kind: Component
+metadata:
+  name: bondpricer-native-ce-component
+  namespace: ms-dev-ce
+spec:
+  workload:
+    apiVersion: core.oam.dev/v1alpha2
+    kind: ContainerizedWorkload
+    metadata:
+      name: bondpricer-native-ce-workload
+      labels:
+        app: bondpricer-native-ce
+    spec:
+      containers:
+      - name: app-cnt
+        image: "docker.io/nelvadas/bondpricing:1.0.0-micronaut-graalce-native-u1"
+        ports:
+          - containerPort: 8080
+            name: http
+        
+---
+apiVersion: core.oam.dev/v1alpha2
+kind: ApplicationConfiguration
+metadata:
+  name: bondpricer-native-ce-appconf
+  namespace: ms-dev-ce
+  annotations:
+    version: v1.0.0
+    description: "Bond Pricer App with GraalVM CE Native Image"
+spec:
+  components:
+    - componentName: bondpricer-native-ce-component
+      traits:
+        - trait:
+            apiVersion: oam.verrazzano.io/v1alpha1
+            kind: MetricsTrait
+            spec:
+              scraper: verrazzano-system/vmi-system-prometheus-0
+              path: "/prometheus"
+        - trait:
+            apiVersion: oam.verrazzano.io/v1alpha1
+            kind: IngressTrait
+            metadata:
+              name: bondpricer-native-ce-ingress
+            spec:
+              rules:
+                - paths:
+                    - path: "/"
+                      pathType: Prefix
+
+

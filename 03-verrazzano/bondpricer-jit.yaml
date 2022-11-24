@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: app-cnt
-        image: "docker.io/nelvadas/bondpricing:1.0.0-micronaut-openjdk17"
+        image: "docker.io/nelvadas/bondpricing:1.0.0-micronaut-openjdk17-u2"
         ports:
           - containerPort: 8080
             name: http

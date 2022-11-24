@@ -1,4 +1,4 @@
-FROM ghcr.io/graalvm/native-image:ol8-java17-22 AS builder
+FROM container-registry.oracle.com/graalvm/native-image-ee:ol8-java17 AS builder
 
 # Install tar and gzip to extract the Maven binaries
 RUN microdnf update \
@@ -24,7 +24,7 @@ RUN mvn clean package  -Dpackaging=native-image -Pnative
 
 
 # The deployment Image
-FROM docker.io/oraclelinux:8-slim
+FROM gcr.io/distroless/base-debian10
 EXPOSE 8080
 # Copy the native executable into the containers
 COPY --from=builder /build/target/MnBondPricing .

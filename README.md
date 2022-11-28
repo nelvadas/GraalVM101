@@ -9,8 +9,7 @@ GraalVM 101: <i>Practical Workshop to Get Started with GraalVM Enterprise Editio
  3. [GraalVM JIT to boost Throughputs](#performance-boot-with-graalvm-jit-compiler)
  4. [GraalVM Native Image : Faster,Leaner ](#performance-boot-with-graalvm-nativeimage)
  5. [Cloud Native Deployments with GraalVM Native Image](#cloud-native-devployment)
- 6. [Micronaut with GraalVM Native Image](./02-micronaut/)
-
+ 
 # Tooling and requirements
 
 - Java Runtimes: GraalVM + OpenJDK

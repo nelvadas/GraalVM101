@@ -328,11 +328,13 @@ Send a huge workload by running the scrip
 ```sh
 $ ./generateLoad.sh
 ```
-Check the metrics on the graphana dashboad.
+Check the metrics on the grafana dashboad.
 
 ![Grafana Dashboard](./images/grafana.png)
 
+GraalVM EE application starts faster than the traditionnal app, and use less CPU & Memory.
 
+-
 
 
 

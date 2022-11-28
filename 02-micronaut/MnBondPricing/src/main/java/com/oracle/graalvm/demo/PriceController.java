@@ -33,9 +33,7 @@ public class PriceController {
 			@QueryValue(value = "yield") double yield,
 			@QueryValue( value="interestRate" ) double interestRate
 	)
-
 	{
-
 		Double bondMarketPrice=
 				Stream.iterate(1, year -> year +1)
 				.limit(maturity)

@@ -20,7 +20,7 @@ WORKDIR /build
 COPY . /build
 
 # Build
-RUN mvn clean package  -Dpackaging=native-image -Pnative
+RUN mvn clean package  -Dpackaging=native-image
 
 
 # The deployment Image

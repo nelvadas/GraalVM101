@@ -102,26 +102,6 @@
   <build>
     <plugins>
 
-<!--
-      <plugin>
-        <groupId>com.google.cloud.tools</groupId>
-        <artifactId>jib-maven-plugin</artifactId>
-        <configuration>
-          <container>
-            <jvmFlags>
-              <jvmFlag>-Dmy.property=example.value</jvmFlag>
-              <jvmFlag>-Xms512m</jvmFlag>
-              <jvmFlag>-Xdebug</jvmFlag>
-            </jvmFlags>
-            <args>
-              <arg>some</arg>
-              <arg>args</arg>
-            </args>
-          </container>
-        </configuration>
-      </plugin>
--->
-
       <plugin>
         <groupId>io.micronaut.build</groupId>
         <artifactId>micronaut-maven-plugin</artifactId>

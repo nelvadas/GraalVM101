@@ -5,7 +5,7 @@ GraalVM 101: <i>Practical Workshop to Get Started with GraalVM Enterprise Editio
 <b> Table of Contents</b>
 
  1. [Install GraalVM EE](#installing-graalvm-ee)
- 2. [Creating a simple Spring Boot Bond Princing API](#bond-pricing-spring-boot-api)
+ 2. [Creating a simple Spring Boot/Micronaut Bond Princing API](#bond-pricing-spring-boot-api)
  3. [GraalVM JIT to boost Throughputs](#performance-boot-with-graalvm-jit-compiler)
  4. [GraalVM Native Image : Faster,Leaner ](#performance-boot-with-graalvm-nativeimage)
  5. [Cloud Native Deployments with GraalVM Native Image](#cloud-native-devployment)

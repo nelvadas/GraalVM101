@@ -1,20 +1,53 @@
-## Micronaut 3.7.4 Documentation
+# MnBondPricing Java 21 & Micronaut Support 
 
-- [User Guide](https://docs.micronaut.io/3.7.4/guide/index.html)
-- [API Reference](https://docs.micronaut.io/3.7.4/api/index.html)
-- [Configuration Reference](https://docs.micronaut.io/3.7.4/guide/configurationreference.html)
-- [Micronaut Guides](https://guides.micronaut.io/index.html)
+## Build Locally 
 
----
+Build 
+```
+$ mvn clean package
+```
 
-## Feature http-client documentation
+Run the App
+```
+$ java -jar  target/MnBondPricing-0.1.jar
+ __  __ _                                  _   
+|  \/  (_) ___ _ __ ___  _ __   __ _ _   _| |_ 
+| |\/| | |/ __| '__/ _ \| '_ \ / _` | | | | __|
+| |  | | | (__| | | (_) | | | | (_| | |_| | |_ 
+|_|  |_|_|\___|_|  \___/|_| |_|\__,_|\__,_|\__|
+14:54:21.155 [main] INFO  io.micronaut.runtime.Micronaut - Startup completed in 883ms. Server Running: http://localhost:8080
 
-- [Micronaut HTTP Client documentation](https://docs.micronaut.io/latest/guide/index.html#httpClient)
+```
+## Docker Container
+```sh
+docker build -t nelvadas/bondpricing:1.0.0-micronaut-oraclejdk22 -f ./docker/Dockerfile.jit.oraclejdk .
+```
 
-## Feature management documentation
 
-- [Micronaut Management documentation](https://docs.micronaut.io/latest/guide/index.html#management)
+## Metrics 
 
+- Check the metrics endpoint 
+- Root metrics endpoint 
+```sh 
+$ curl localhost:8080/metrics
+```
+
+- Microservice uptime
+```sh 
+$ curl localhost:8080/metrics/process.uptime
+
+{
+  "name": "process.uptime",
+  "measurements": [
+    {
+      "statistic": "VALUE",
+      "value": 1053.217
+    }
+  ],
+  "description": "The uptime of the Java virtual machine"
+}
+
+```
 
 ## 
 

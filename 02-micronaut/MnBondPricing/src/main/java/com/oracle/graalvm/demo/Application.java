@@ -1,11 +1,17 @@
 package com.oracle.graalvm.demo;
 
-import io.micrometer.core.instrument.Tags;
-import io.micrometer.prometheus.PrometheusConfig;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
-import io.micronaut.configuration.metrics.micrometer.prometheus.PrometheusMeterRegistryFactory;
-import io.micronaut.runtime.Micronaut;
 
+import io.micronaut.runtime.Micronaut;
+import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.info.*;
+
+
+@OpenAPIDefinition(
+        info = @Info(
+                title = "MnBondPricing",
+                version = "0.1"
+        )
+)
 
 public class Application {
 

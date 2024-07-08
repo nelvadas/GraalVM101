@@ -3,4 +3,4 @@ defaultPackage: com.oracle.graalvm.demo
 testFramework: junit
 sourceLanguage: java
 buildTool: maven
-features: [annotation-api, app-name, http-client, jackson-databind, java, java-application, junit, logback, management, maven, micrometer, micrometer-prometheus, netty-server, readme, shade, yaml]
+features: [app-name, graalvm, http-client-test, java, java-application, junit, logback, management, maven, maven-enforcer-plugin, micrometer, micrometer-prometheus, micronaut-aot, micronaut-http-validation, netty-server, openapi, properties, readme, serialization-jackson, shade, static-resources, swagger-ui]

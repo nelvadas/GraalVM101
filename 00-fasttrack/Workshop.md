@@ -307,8 +307,31 @@ native-image --gc=epsilon --emit build-report  -cp target/*.jar com.oracle.graal
 </ul>
 <i>Duration</i>: 45 min
 
+1. Install pyenv in order to manage python version on your workstation  `https://github.com/pyenv/pyenv`
+2. Check the python distributions available on your system with `pyenv versions`
+3. Install the graaply python edition: ` pyenv install graalpy-24.1.0`
+4. Set graalpy as the default python in your shell `pyenv shell graalpy-24.1.0`
+5. Clone the [hello-graal-polyglot](nelvadas/hello-graal-polyglot): `git clone https://github.com/nelvadas/hello-graal-polyglot`
+6. Identify the python code in the App class. What does this function do?
+7. Which dependencies should I include in my java project to embed python code?
+8. Build the application using maven
+9. Run the java application
+10. How comptible is GraalPy with the common python libraries like  Numpy, tensorflow ? `use the https://www.graalvm.org/python/compatibility/` 
+
 
 ## Part 2 : Advanceed Microservices with GraalVM Technology
+<i>Objective</i><ul>
+<li>Getting started with GraalVM Micronaut Microservice</li>
+</ul>
+<i>Duration</i>: 45 min
+
+ 1. Review the Slide on Micronaut Bond Pricing 
+ 2. Build the microservice MnBondPricing.jar from subfolder [MnBondPricing](./MnBondPricing) 
+ 3. Start the microservice with GraalVM JIT
+ 4. Compute some bonds price with curl/postman
+  ```sh
+  curl "http://localhost:8080/price/JUBILEE/100/10/?yield=0.03&interestRate=0.06"
+  ```
 
 
 
@@ -320,6 +343,7 @@ native-image --gc=epsilon --emit build-report  -cp target/*.jar com.oracle.graal
 <li>Improve Microservices performance with GraalVM AOT</li>
 </ul>
 <i>Duration</i>: 55 min
+
 Follow instructions in [MnBondPricing/README.md](./MnBondPricing/README.md)
 
 

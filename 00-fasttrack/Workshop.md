@@ -312,6 +312,7 @@ native-image --gc=epsilon --emit build-report  -cp target/*.jar com.oracle.graal
 
 
 
+
 ### Lab05 - Microservices with GraalVM JIT & AOT Benchmarks
 <i>Objective</i><ul>
 <li>Build Microservices with GraalVM Technology</li>
@@ -319,6 +320,7 @@ native-image --gc=epsilon --emit build-report  -cp target/*.jar com.oracle.graal
 <li>Improve Microservices performance with GraalVM AOT</li>
 </ul>
 <i>Duration</i>: 55 min
+Follow instructions in [MnBondPricing/README.md](./MnBondPricing/README.md)
 
 
 ### Lab06 - Native Imade Deep Dive - From Dynamic to Fully Static Images
@@ -330,11 +332,18 @@ native-image --gc=epsilon --emit build-report  -cp target/*.jar com.oracle.graal
 </ul>
 <i>Duration</i>: 55 min
 
+1. Build a Fully Dynamic Image of the MnBondPricing Application 
+2. Build a Mostly Static Image of the MnBondPricing Application 
+3. Build a Fully Static Image of the MnBondPricing Application  
+4. Which is the best one for your container deployments?
+
 
 ### Lab07 - Monitoring and Performance with JFR/JMC
 
+Live Labs
+
 ### Lab08 - Multicloud App with GDK
 
-
+[https://graal.cloud/gdk/hands-on-labs/](https://graal.cloud/gdk/hands-on-labs/)
 
 ## Final Quiz

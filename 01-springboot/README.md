@@ -542,10 +542,21 @@ The native image build starts very fast <b><span style="color:green">0.134s</spa
 
 ### The Old way
 
+Connect to Oracle Container registry 
+```sh
+$ podman login container-registry.oracle.com -u $OCR_USER  -p $OCR_TOKEN
+```
+
+Connect to Github Container Registry 
+```sh
+$ podman login ghcr.io -u $GHCR_USER  -p $OCR_TOKEN
+sh 
+
+
 #### Build a JIT container
 ```sh 
 $ cd BondPricing
-$ docker build -f docker/Dockerfile.jit.ol9.openjdk23 -t  ghcr.io/nelvadas/bondpricing:2.0.0-spring-jit-openjdk23  .
+$ docker build -f docker/Dockerfile.jit.ol8.openjdk23 -t  ghcr.io/nelvadas/bondpricing:2.0.0-spring-jit-openjdk23  .
 ```
 Image size 
 
@@ -589,7 +600,8 @@ tomcat_sessions_rejected_sessions_total 0.0
 ```sh
 $ cd k8s
 ```
-
+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
+https://github.com/nelvadas/GraalVM101.git
 
 
 ### Natime image patterns

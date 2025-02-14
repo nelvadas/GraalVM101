@@ -1,4 +1,4 @@
-FROM openjdk:23-oraclelinux8
+FROM docker.io/openjdk:23-oraclelinux8
 
 
 # JAR file will be specified by passing in a build time argument to docker build

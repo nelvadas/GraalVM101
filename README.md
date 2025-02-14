@@ -21,10 +21,10 @@ GraalVM 101: <i>Practical Workshop to Get Started with GraalVM Enterprise Editio
 
 ## Installing GraalVM EE
 
-Use the following docs/links to install GraalVM Enterprise 22.2+
+Use the following docs/links to install Oracle GraalVM for JDK 17/21/23+
 
-* [GraalVM Installation instructions](https://docs.oracle.com/en/graalvm/enterprise/22/docs/getting-started/#install-graalvm-enterprise)
-* [Oracle Linux /OCI](https://docs.oracle.com/en/graalvm/enterprise/22/docs/getting-started/#install-graalvm-enterprise)
+* [GraalVM Installation instructions](https://docs.oracle.com/en/graalvm/)
+* [Oracle Linux /OCI](https://docs.oracle.com/en/graalvm/jdk/23/docs/getting-started/)
 
 
 ## Bond Pricing Spring Boot API

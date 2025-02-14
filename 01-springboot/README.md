@@ -22,10 +22,9 @@ GraalVM 101: <i>Practical Workshop to Get Started with GraalVM Enterprise Editio
 
 ## Installing GraalVM EE
 
-Use the following docs/links to install GraalVM Enterprise 22.2+
+Use the following docs/links to install Oracle GraalVM for JDK 23
 
-* [GraalVM Installation instructions](https://docs.oracle.com/en/graalvm/enterprise/22/docs/getting-started/#install-graalvm-enterprise)
-* [Oracle Linux /OCI](https://docs.oracle.com/en/graalvm/enterprise/22/docs/getting-started/#install-graalvm-enterprise)
+* [GraalVM Installation instructions](https://docs.oracle.com/en/graalvm/)
 
 
 ## Bond Pricing Spring Boot API
@@ -45,20 +44,31 @@ Where:
 * `T` represents the number of payment to received/ years( Maturity Term)
 * [More about the formular](https://www.simtrade.fr/blog_simtrade/how-compute-present-value-asset/)
 
-1. Use spring initialzr to create the following project
-![BondPricingProject](./images/BondPricingSpringInitialzr.png)
-Fill the form with the following details.
+1. Use spring [initialzr](https://start.spring.io/) to create the following project
+![BondPricingProject](./images/spring34.png)
+
+2. Keep the default selected items
+Language: <b>Java</b><br>
+Project: <b>Maven</b><br>
+Spring Boot: <b>3.4.2</b><br>
+
+3. Fill the form with the following details.
 Group: <b>com.oracle.graalvm.demo</b><br>
 Artifact: <b>BondPricing</b><br>
 Description : <b>Bond Pricing Demo Project for GraalVM & Spring Boot</b><br>
 Package Name: <b>com.oracle.graalvm.demo</b><br>
 Packaging: <b>Jar</b><br>
-Java:  <b>11</b><br>
+Java:  <b>23</b><br>  <i>Pick the java version that suits your needs</i>
 
+4. Add the following dependencies
+- GraalVM Native Support
+- Spring Web
+- Prometheus
+- Spring Boot Actuator
 
+5. Download the project, unzip it and open the directory in your favorite code editor. or use the shared [configuration provided](https://start.spring.io/#!type=maven-project&language=java&platformVersion=3.4.2&packaging=jar&jvmVersion=23&groupId=com.oracle.graalvm.demo&artifactId=BondPricing&name=BondPricing&description=Bond%20Pricing%20Demo%20Project%20for%20GraalVM%20%26%20Spring%20Boot&packageName=com.oracle.graalvm.demo&dependencies=native,prometheus,web,actuator) to replicate
 
-2. Download the project, unzip it and open the directory in your favorite code editor.
-Add a `com.oracle.graalvm.demo.PricerController` class as describeb below.
+6. Add a `com.oracle.graalvm.demo.PricerController` class as describeb below.
 
 - The conroller has two endpoints
 - `/` return a welcome text
@@ -90,7 +100,7 @@ public class PriceController {
   * @return The Bond Selling price
   */
  @GetMapping("/price/{name}/{principal}/{maturity}")
- ResponseEntity price (
+  public ResponseEntity<String>  price (
    @PathVariable(name = "name") String name,
    @PathVariable(value ="principal" , required = true ) double principal,
    @PathVariable(value = "maturity", required = true) int maturity,
@@ -116,7 +126,7 @@ public class PriceController {
 
 ```
 
-Upate the Test Case
+7. Upate the Test Case
 
 ```java
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -128,62 +138,67 @@ public class PriceControllerTest {
 
     @Test
     public void getPrice() throws Exception {
-        ResponseEntity<Double> response = template.getForEntity("/price/GRAALVM_PREMIUM_BOND/100/1?yield=0.01&interestRate=0.05", Double.class);
-        assertThat(response.getBody()).isEqualTo(103.960);
+         ResponseEntity<String> response = template.getForEntity("/price/GRAALVM_PREMIUM_BOND/100/1?yield=0.01&interestRate=0.05", String.class);
+        assertThat(response.getBody().toString().contains("103.960"));
     }
 
 ```
 
 
 
-3. Use GraalVM Enterprise 22.2.0 as your Java Runtime 
+8. Use Oracle GraalVM  23+ as your Java Runtime 
 various options available:
 - export JAVA_HOME=..
-- sdk use java x.y.z
+- `sdk use java 23-graal`
 
 ```sh 
 $ $ java -version
-java version "11.0.16" 2022-07-19 LTS
-Java(TM) SE Runtime Environment GraalVM EE 22.2.0 (build 11.0.16+11-LTS-jvmci-22.2-b05)
-Java HotSpot(TM) 64-Bit Server VM GraalVM EE 22.2.0 (build 11.0.16+11-LTS-jvmci-22.2-b05, mixed mode, sharing)
+❯ java -version
+java version "23" 2024-09-17
+Java(TM) SE Runtime Environment Oracle GraalVM 23+37.1 (build 23+37-jvmci-b01)
+Java HotSpot(TM) 64-Bit Server VM Oracle GraalVM 23+37.1 (build 23+37-jvmci-b01, mixed mode, sharing)
 ```
 
-4- Build the Application and get a couple of fair prices using Maven/Gradle
+9- Build the Application and get a couple of fair prices using Maven/Gradle
 ```sh
 $ mvn clean package 
 ...
-[INFO] --- maven-jar-plugin:3.2.2:jar (default-jar) @ BondPricing ---
-[INFO] Building jar: /Users/nono/Projects/Workshops/EMEA-HOL-GraalVM22/GraalVM101/BondPricing/target/BondPricing-0.0.1-SNAPSHOT.jar
+ar
 [INFO]
-[INFO] --- spring-boot-maven-plugin:2.7.3:repackage (repackage) @ BondPricing ---
-[INFO] Replacing main artifact with repackaged archive
+[INFO] --- spring-boot:3.4.2:repackage (repackage) @ BondPricing ---
+[INFO] Replacing main artifact /Users/enono/Workspace/Java/...lab/GraalVM101/01-springboot/BondPricing/target/BondPricing-0.0.1-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to /Users/enono/Workspace/Java/.../lab/GraalVM101/01-springboot/BondPricing/target/BondPricing-0.0.1-SNAPSHOT.jar.original
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  35.096 s
-[INFO] Finished at: 2022-09-19T13:59:12+02:00
+[INFO] Total time:  3.310 s
+[INFO] Finished at: 2025-02-13T10:46:05+01:00
 [INFO] ------------------------------------------------------------------------
 ```
 the `BondPricing-0.0.1-SNAPSHOT.jar` is  generates and can be started using 
 
 ```sh
 $ java -jar target/BondPricing-0.0.1-SNAPSHOT.jar
-2022-09-19 14:02:56.375  INFO 11751 --- [           main] o.s.nativex.NativeListener               : AOT mode disabled
-
-  .   ____          _            __ _ _
+ .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
 ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
   '  |____| .__|_| |_|_| |_\__, | / / / /
  =========|_|==============|___/=/_/_/_/
- :: Spring Boot ::                (v2.7.3)
 
-2022-09-19 14:02:56.459  INFO 11751 --- [           main] c.o.graalvm.demo.BondPricingApplication  : Starting BondPricingApplication v0.0.1-SNAPSHOT using Java 11.0.16 on nono-mac with PID 11751 (/Users/nono/Projects/Workshops/EMEA-HOL-GraalVM22/GraalVM101/BondPricing/target/BondPricing-0.0.1-SNAPSHOT.jar 
-BondPricingApplication  : Started BondPricingApplication in 2.087 seconds (JVM running for 2.638)
+ :: Spring Boot ::                (v3.4.2)
+
+2025-02-13T10:48:03.037+01:00  INFO 59585 --- [BondPricing] [           main] c.o.graalvm.demo.BondPricingApplication  : Starting BondPricingApplication v0.0.1-SNAPSHOT using Java 23 with PID 59585 (/Users/enono/Workspace/Java/lab/GraalVM101/01-springboot/BondPricing/target/BondPricing-0.0.1-SNAPSHOT.jar started by enono in /Users/enono/Workspace/Java//lab/GraalVM101/01-springboot/BondPricing)
+2025-02-13T10:48:03.039+01:00  INFO 59585 --- [BondPricing] [           main] c.o.graalvm.demo.BondPricingApplication  : No active profile set, falling back to 1 default profile: "default"
+...
+8080 (http) with context path '/'
+2025-02-13T10:48:03.719+01:00  INFO 59585 --- [BondPricing] [           main] c.o.graalvm.demo.BondPricingApplication  : Started BondPricingApplication in 0.836 seconds (process running for 1.069)
 ```
-the application starts in <b>2.087 seconds.</b>
+the application starts in <b>0.836 seconds.</b>
 
-5- Compute a couple of bond Fair Values 
+
+
+10- Compute a couple of bond Fair Values 
 ```sh
 $ curl  'http://localhost:8080/price/graalvm-premium-bond/100/1?yield=0.01&interestRate=0.05'
 103,960
@@ -193,14 +208,34 @@ $ curl  'http://localhost:8080/price/graalvm-discount_bond/100/1?yield=0.06&inte
 ```
 
 
+
 ## Performance Boost with GraalVM JIT Compiler
 ### GraalVM JIT
 In the following section we start the BondPricer with GraalVM JIT, then send 10000 pricing request with a factor 100 for concurrency level.
 Load is sent using  Apache Benchmark 
 
+We limit the application to use maximum 20% of the available CPU
+
+ ```sh
+$sdk use java 23-graal
+$ cpulimit -l 20  java -jar target/BondPricing-0.0.1-SNAPSHOT.jar
+2025-02-13T11:48:33.850+01:00  INFO 65633 --- [BondPricing] [           main] c.o.graalvm.demo.BondPricingApplication  : Started BondPricingApplication in 0.884 seconds (process running for 1.119)
+```
+The application starts with pid=65633
+
+Use the pid provided to track cpu and memory usage 
+```sh
+top -pid 65633
+PID    COMMAND      %CPU  TIME     #TH    #WQ  #POR MEM   PURG CMPR PGRP  PPID  STATE    BOOSTS    %CPU_ME %CPU_OTHRS UID  FAULTS COW   MSGSEN
+65633  java         0.1   00:12.19 45     1    175  411M  0B   0B   65632 65632 sleeping *0[1]     0.00000 0.00000    503  74271  4939  45070+
+```
+
+
+
 ```sh 
 $ ab -n 10000 -c 100  'http://localhost:8080/price/graalvm/100/20?yield=0.01&interestRate=0.05'
-This is ApacheBench, Version 2.3 <$Revision: 1879490 $>
+❯ ab -n 10000 -c 100  'http://localhost:8080/price/graalvm/100/20?yield=0.01&interestRate=0.05'
+This is ApacheBench, Version 2.3 <$Revision: 1913912 $>
 Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
 Licensed to The Apache Software Foundation, http://www.apache.org/
 
@@ -226,33 +261,33 @@ Document Path:          /price/graalvm/100/20?yield=0.01&interestRate=0.05
 Document Length:        8 bytes
 
 Concurrency Level:      100
-Time taken for tests:   4.562 seconds
+Time taken for tests:   0.686 seconds
 Complete requests:      10000
 Failed requests:        0
 Total transferred:      1400000 bytes
 HTML transferred:       80000 bytes
-Requests per second:    2192.14 [#/sec] (mean)
-Time per request:       45.618 [ms] (mean)
-Time per request:       0.456 [ms] (mean, across all concurrent requests)
-Transfer rate:          299.71 [Kbytes/sec] received
+Requests per second:    14575.07 [#/sec] (mean)
+Time per request:       6.861 [ms] (mean)
+Time per request:       0.069 [ms] (mean, across all concurrent requests)
+Transfer rate:          1992.69 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        1   23  10.6     22     140
-Processing:     2   22  11.9     20     141
-Waiting:        1   21  11.4     19     139
-Total:         24   45  16.7     41     189
+Connect:        0    3   0.8      3      11
+Processing:     2    4   0.8      3      12
+Waiting:        1    4   0.8      3      12
+Total:          3    7   1.3      7      16
 
 Percentage of the requests served within a certain time (ms)
-  50%     41
-  66%     44
-  75%     46
-  80%     48
-  90%     56
-  95%     70
-  98%     94
-  99%     97
- 100%    189 (longest request)
+  50%      7
+  66%      7
+  75%      7
+  80%      7
+  90%      7
+  95%      8
+  98%     12
+  99%     14
+ 100%     16 (longest request)
  ```
 
 
@@ -263,12 +298,11 @@ In the following section we restart the BondPricer with a default JIT compiler, 
 use the `-XX:-UseJVMCICompiler` JVM option to fall back of the default JIT compiler or restart your application with an openJDK 11 for eg.
 
 ```sh
-$ java`-XX:-UseJVMCICompiler -jar target/BondPricing-0.0.1-SNAPSHOT.jar
+$ cpulimit -l 20  java -XX:-UseJVMCICompiler -jar target/BondPricing-0.0.1-SNAPSHOT.jar
 ```
 Benchmark - C2 compiler
 ```sh
-$ ab -n 10000 -c 100  'http://localhost:8080/price/graalvm/100/20?yield=0.01&interestRate=0.05'
-This is ApacheBench, Version 2.3 <$Revision: 1879490 $>
+$ This is ApacheBench, Version 2.3 <$Revision: 1913912 $>
 Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
 Licensed to The Apache Software Foundation, http://www.apache.org/
 
@@ -294,34 +328,35 @@ Document Path:          /price/graalvm/100/20?yield=0.01&interestRate=0.05
 Document Length:        8 bytes
 
 Concurrency Level:      100
-Time taken for tests:   5.910 seconds
+Time taken for tests:   1.099 seconds
 Complete requests:      10000
 Failed requests:        0
 Total transferred:      1400000 bytes
 HTML transferred:       80000 bytes
-Requests per second:    1692.16 [#/sec] (mean)
-Time per request:       59.096 [ms] (mean)
-Time per request:       0.591 [ms] (mean, across all concurrent requests)
-Transfer rate:          231.35 [Kbytes/sec] received
+Requests per second:    9097.08 [#/sec] (mean)
+Time per request:       10.993 [ms] (mean)
+Time per request:       0.110 [ms] (mean, across all concurrent requests)
+Transfer rate:          1243.74 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        1   27   9.4     24      85
-Processing:     7   30  12.5     27     163
-Waiting:        7   28  11.0     25     116
-Total:         32   57  16.6     51     165
+Connect:        0    1   1.2      1      14
+Processing:     1    9   7.4      6     129
+Waiting:        0    8   7.2      6      85
+Total:          1   10   7.5      8     136
 
 Percentage of the requests served within a certain time (ms)
-  50%     51
-  66%     56
-  75%     61
-  80%     66
-  90%     85
-  95%     96
-  98%    104
-  99%    112
- 100%    165 (longest request)
-````
+  50%      8
+  66%      9
+  75%     11
+  80%     13
+  90%     18
+  95%     24
+  98%     34
+  99%     42
+ 100%    136 (longest request)
+
+```
 Benchmark with Amazon Correto
 
 ```sh
@@ -506,25 +541,57 @@ The native image build starts very fast <b><span style="color:green">0.134s</spa
  
 
 ### The Old way
+
+#### Build a JIT container
 ```sh 
 $ cd BondPricing
-$ docker build -f docker/Dockerfile.jit -t nelvadas/bondpricing:1.0-jit-temurin-11.0.16 .
+$ docker build -f docker/Dockerfile.jit.ol9.openjdk23 -t  ghcr.io/nelvadas/bondpricing:2.0.0-spring-jit-openjdk23  .
 ```
 Image size 
 
 ```sh 
-$ docker images | grep bondpricing
-nelvadas/bondpricing               1.0-jit-temurin-11.0.16         a203dd86e670   5 minutes ago    972MB
+❯ docker images | grep bondpricing
+ghcr.io/nelvadas/bondpricing                         2.0.0-spring-jit-openjdk23   922a6123843a  4 hours ago    559 MB
 ```
 Application up and Running 
 
 ```sh 
-$ docker run -p 7070:8080 -d docker.io/nelvadas/bondpricing:1.0-jit-temurin-11.0.16
-5f0d75a17a17bcc4c70e68c6c3cbe6261ba909d5e8822e9a12020549a745ccb8
-nono-mac:BondPricing nono$ docker ps
-CONTAINER ID   IMAGE                                          COMMAND                  CREATED         STATUS         PORTS                    NAMES
-5f0d75a17a17   nelvadas/bondpricing:1.0-jit-temurin-11.0.16   "/root/.sdkman/candi…"   3 seconds ago   Up 2 seconds   0.0.0.0:7070->8080/tcp   youthful_mestorf
+$ docker run -p 7070:8080 -d ghcr.io/nelvadas/bondpricing:2.0.0-spring-jit-openjdk23
+❯ docker ps
+CONTAINER ID  IMAGE                                                    COMMAND            CREATED      STATUS      PORTS                             NAMES
+97be841d16cb  ghcr.io/nelvadas/bondpricing:2.0.0-spring-jit-openjdk23  java -jar app.jar  4 hours ago  Up 4 hours  0.0.0.0:7070->8080/tcp, 8080/tcp  boring_burnell
 ```
+#### Check the metrics published by the application 
+
+```sh 
+~ via 🐍 v3.12.4 on ☁️  (us-east-2)
+❯ curl http://localhost:7070/actuator/prometheus
+# HELP application_ready_time_seconds Time taken for the application to be ready to service requests
+# TYPE application_ready_time_seconds gauge
+application_ready_time_seconds{main_application_class="com.oracle.graalvm.demo.BondPricingApplication"} 0.962
+# HELP application_started_time_seconds Time taken to start the application
+# TYPE application_started_time_seconds gauge
+....
+# TYPE tomcat_sessions_created_sessions_total counter
+tomcat_sessions_created_sessions_total 0.0
+# HELP tomcat_sessions_expired_sessions_total
+# TYPE tomcat_sessions_expired_sessions_total counter
+tomcat_sessions_expired_sessions_total 0.0
+# HELP tomcat_sessions_rejected_sessions_total
+# TYPE tomcat_sessions_rejected_sessions_total counter
+tomcat_sessions_rejected_sessions_total 0.0
+```
+
+
+
+#### Deploy a JIT container on Kubernetes
+
+```sh
+$ cd k8s
+```
+
+
+
 ### Natime image patterns
 
 #### Build a native image 

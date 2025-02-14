@@ -1,0 +1,41 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bondpricer
+  labels:
+    app: bondpricer
+spec:
+  selector:
+    matchLabels:
+      app: bondpricer
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: bondpricer
+    spec:
+      containers:
+      - name: bondpricer
+        image: ghcr.io/nelvadas/bondpricing:2.0.0-spring-jit-openjdk23
+        command: ["java - version"]
+        args: ["-XX:+PrintFlagsFinal", "-jar", "app.jar"]
+        env:
+        - name: JAVA_OPTS
+          value: "-XshowSettings:vm  -XX:UseCGroupMemoryLimitForHeap"
+        ports:
+        - name: http 
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: 8080
+          initialDelaySeconds: 5
+          timeoutSeconds: 3
+        livenessProbe:
+          httpGet:
+            path: /health/liveness
+            port: 8080
+          initialDelaySeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 10

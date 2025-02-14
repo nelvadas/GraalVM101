@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    prometheus.io/scrape: "true"
+  labels:
+    kubernetes.io/metadata.name: bondpricer-spring-jit
+  name: bondpricer-spring-jit
+spec:
+  finalizers:
+  - kubernetes
+status:
+  phase: Active

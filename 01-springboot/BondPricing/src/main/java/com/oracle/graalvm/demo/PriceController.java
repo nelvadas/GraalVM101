@@ -1,9 +1,12 @@
 package com.oracle.graalvm.demo;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.stream.Stream;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class PriceController {
@@ -23,7 +26,8 @@ public class PriceController {
 	 * @return The Bond Selling price
 	 */
 	@GetMapping("/price/{name}/{principal}/{maturity}")
-	ResponseEntity price (
+	 
+	public ResponseEntity<String>  price (
 			@PathVariable(name = "name") String name,
 			@PathVariable(value ="principal" , required = true ) double principal,
 			@PathVariable(value = "maturity", required = true) int maturity,
@@ -41,6 +45,7 @@ public class PriceController {
 				.sum() ;
 
 		bondMarketPrice += principal/Math.pow(1+yield,maturity);
+		
 
 		return ResponseEntity.ok().body(String.format("%.3f\n",bondMarketPrice));
 	}

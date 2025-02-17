@@ -595,6 +595,7 @@ tomcat_sessions_rejected_sessions_total 0.0
 ```sh
 $ cd k8s
 ```
+Comment updated
 
 ### Natime image patterns
 

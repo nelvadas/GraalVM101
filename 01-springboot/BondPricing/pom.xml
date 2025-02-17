@@ -61,7 +61,7 @@
                     <buildArgs>
                         <buildArg>-H:+ReportExceptionStackTraces </buildArg>
                         <buildArg>-march=native</buildArg>
-						<buildArg>-Os</buildArg>
+						<buildArg>-Os --verbose</buildArg>
                     </buildArgs>
                 </configuration>
             </plugin>
@@ -83,12 +83,12 @@
                 <configuration>
 
                     <imageName>BondPricingApp</imageName>
-                    <mainClass>com.oracle.graalvm.demo.BondPricingApplication</mainClass>
+                <mainClass>com.oracle.graalvm.demo.BondPricingApplication</mainClass>
+                
                     <buildArgs>
                         <buildArg>-H:+ReportExceptionStackTraces </buildArg>
                         <buildArg>-march=native</buildArg>
-						<buildArg>-Os</buildArg>
-                        <buildArg>--static</buildArg>
+						<buildArg>-Os --verbose</buildArg>
                     </buildArgs>
                 </configuration>
             </plugin>

@@ -26,10 +26,14 @@ RUN mvn -version
 WORKDIR /build
 
 # Copy the source code into the image for building
-COPY . /build
+COPY src /build/src
+COPY pom.xml   /build/pom.xml
+
+
+RUN ls -rtl
 
 # Build
-RUN mvn clean package native:compile -Pnative-static -X -DskipTests -e
+RUN mvn clean package native:compile -Pnative -DskipTests -X 
 
 
 

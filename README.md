@@ -45,11 +45,10 @@ Where:
 * [More about the formular](https://www.simtrade.fr/blog_simtrade/how-compute-present-value-asset/)
 
 
-You can either build this API with SpringBoot or Micronaut by following the links bellow.
-1. [BondPricing API with SpringBoot and GraalVM](./01-springboot/)
+You can either build this BondPricing API with SpringBoot or Micronaut by following the links bellow.
+1. [BondPricing API with SpringBoot 3 and GraalVM](./01-springboot/)
 
 2. [BondPricing API with Micronaut  and GraalVM](./02-micronaut/)
-
 
 
 

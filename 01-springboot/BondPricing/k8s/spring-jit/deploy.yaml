@@ -17,8 +17,8 @@ spec:
     spec:
       containers:
       - name: bondpricer
-        image: ghcr.io/nelvadas/bondpricing:2.0.0-spring-jit-openjdk23
-        command: ["java - version"]
+        image: ghcr.io/nelvadas/bondpricing:2.0.0-spring-jit-openjdk23-x86_64
+        command: ["java"]
         args: ["-XX:+PrintFlagsFinal", "-jar", "app.jar"]
         env:
         - name: JAVA_OPTS
@@ -28,13 +28,13 @@ spec:
           containerPort: 8080
         readinessProbe:
           httpGet:
-            path: /health/readiness
+            path: /actuator/health
             port: 8080
           initialDelaySeconds: 5
           timeoutSeconds: 3
         livenessProbe:
           httpGet:
-            path: /health/liveness
+            path: /actuator/health
             port: 8080
           initialDelaySeconds: 5
           timeoutSeconds: 3

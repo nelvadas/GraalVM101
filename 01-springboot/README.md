@@ -1,5 +1,5 @@
 # GraalVM 101 - Spring Boot 
-GraalVM 101: <i>Practical Workshop to Get Started with GraalVM Enterprise Edition.</i>
+GraalVM 101: <i>Practical Workshop to Get Started with Orcle GraalVM  .</i>
 
 
 <b> Table of Contents</b>
@@ -144,9 +144,20 @@ public class PriceControllerTest {
 
 ```
 
+8. In oder to produce  metrics for premetheus, use the following configuration
+```sh
+cat src/main/application.properties
+
+spring.application.name=BondPricing
+management.endpoints.web.exposure.include=health,info,liveness,readiness,metrics,prometheus
+management.endpoint.metrics.enabled=true
+management.health.livenessState.enabled=true
+management.health.readinessState.enabled=true
+```
 
 
-8. Use Oracle GraalVM  23+ as your Java Runtime 
+
+9. Use Oracle GraalVM  23+ as your Java Runtime 
 various options available:
 - export JAVA_HOME=..
 - `sdk use java 23-graal`
@@ -159,7 +170,7 @@ Java(TM) SE Runtime Environment Oracle GraalVM 23+37.1 (build 23+37-jvmci-b01)
 Java HotSpot(TM) 64-Bit Server VM Oracle GraalVM 23+37.1 (build 23+37-jvmci-b01, mixed mode, sharing)
 ```
 
-9- Build the Application and get a couple of fair prices using Maven/Gradle
+10- Build the Application and get a couple of fair prices using Maven/Gradle
 ```sh
 $ mvn clean package 
 ...
@@ -206,13 +217,13 @@ $ curl  'http://localhost:8080/price/graalvm-premium-bond/100/1?yield=0.01&inter
 $ curl  'http://localhost:8080/price/graalvm-discount_bond/100/1?yield=0.06&interestRate=0.05'
 99,057
 ```
+That concludes the first part. The second part will focus on benchmarking the application's performance using various Java runtimes.
 
 
 
 ## Performance Boost with GraalVM JIT Compiler
 ### GraalVM JIT
-In the following section we start the BondPricer with GraalVM JIT, then send 10000 pricing request with a factor 100 for concurrency level.
-Load is sent using  Apache Benchmark 
+In the following section, we start the BondPricer with GraalVM JIT and then send 10,000 pricing requests with a concurrency level factor of 100. The load is generated using Apache Benchmark."
 
 We limit the application to use maximum 20% of the available CPU
 
@@ -233,8 +244,8 @@ PID    COMMAND      %CPU  TIME     #TH    #WQ  #POR MEM   PURG CMPR PGRP  PPID  
 
 
 ```sh 
-$ ab -n 10000 -c 100  'http://localhost:8080/price/graalvm/100/20?yield=0.01&interestRate=0.05'
 ❯ ab -n 10000 -c 100  'http://localhost:8080/price/graalvm/100/20?yield=0.01&interestRate=0.05'
+ab -n 10000 -c 100  'http://localhost:8080/price/graalvm/100/20?yield=0.01&interestRate=0.05'
 This is ApacheBench, Version 2.3 <$Revision: 1913912 $>
 Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
 Licensed to The Apache Software Foundation, http://www.apache.org/
@@ -261,33 +272,33 @@ Document Path:          /price/graalvm/100/20?yield=0.01&interestRate=0.05
 Document Length:        8 bytes
 
 Concurrency Level:      100
-Time taken for tests:   0.686 seconds
+Time taken for tests:   0.708 seconds
 Complete requests:      10000
 Failed requests:        0
 Total transferred:      1400000 bytes
 HTML transferred:       80000 bytes
-Requests per second:    14575.07 [#/sec] (mean)
-Time per request:       6.861 [ms] (mean)
-Time per request:       0.069 [ms] (mean, across all concurrent requests)
-Transfer rate:          1992.69 [Kbytes/sec] received
+Requests per second:    14131.36 [#/sec] (mean)
+Time per request:       7.076 [ms] (mean)
+Time per request:       0.071 [ms] (mean, across all concurrent requests)
+Transfer rate:          1932.02 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
 Connect:        0    3   0.8      3      11
-Processing:     2    4   0.8      3      12
-Waiting:        1    4   0.8      3      12
-Total:          3    7   1.3      7      16
+Processing:     1    4   1.2      4      14
+Waiting:        1    4   1.1      3      14
+Total:          2    7   1.4      7      17
 
 Percentage of the requests served within a certain time (ms)
   50%      7
   66%      7
   75%      7
   80%      7
-  90%      7
-  95%      8
-  98%     12
+  90%      8
+  95%      9
+  98%     13
   99%     14
- 100%     16 (longest request)
+ 100%     17 (longest request)
  ```
 
 
@@ -295,14 +306,22 @@ Percentage of the requests served within a certain time (ms)
 ### Non GraalVM Java JIT Compiler
 
 In the following section we restart the BondPricer with a default JIT compiler, and  send the same load( 10000 pricing  requests)  with Apache Benchmark and capture the performance Metrics.
-use the `-XX:-UseJVMCICompiler` JVM option to fall back of the default JIT compiler or restart your application with an openJDK 11 for eg.
+use the `-XX:-UseJVMCICompiler` JVM option to fall back of the default JIT compiler or restart your application with an openJDK 23 for eg.
 
 ```sh
-$ cpulimit -l 20  java -XX:-UseJVMCICompiler -jar target/BondPricing-0.0.1-SNAPSHOT.jar
+sdk use java 23-open
+```
+
+
+```sh
+$ cpulimit -l 20  java -XX:+UnlockExperimentalVMOptions -XX:-UseJVMCICompiler -jar target/BondPricing-0.0.1-SNAPSHOT.jar
+
+Started BondPricingApplication in 0.958 seconds (process running for 1.292)
 ```
 Benchmark - C2 compiler
 ```sh
-$ This is ApacheBench, Version 2.3 <$Revision: 1913912 $>
+$ ab -n 10000 -c 100  'http://localhost:8080/price/graalvm/100/20?yield=0.01&interestRate=0.05'
+This is ApacheBench, Version 2.3 <$Revision: 1913912 $>
 Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
 Licensed to The Apache Software Foundation, http://www.apache.org/
 
@@ -328,45 +347,67 @@ Document Path:          /price/graalvm/100/20?yield=0.01&interestRate=0.05
 Document Length:        8 bytes
 
 Concurrency Level:      100
-Time taken for tests:   1.099 seconds
+Time taken for tests:   1.396 seconds
 Complete requests:      10000
 Failed requests:        0
 Total transferred:      1400000 bytes
 HTML transferred:       80000 bytes
-Requests per second:    9097.08 [#/sec] (mean)
-Time per request:       10.993 [ms] (mean)
-Time per request:       0.110 [ms] (mean, across all concurrent requests)
-Transfer rate:          1243.74 [Kbytes/sec] received
+Requests per second:    7162.87 [#/sec] (mean)
+Time per request:       13.961 [ms] (mean)
+Time per request:       0.140 [ms] (mean, across all concurrent requests)
+Transfer rate:          979.30 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    1   1.2      1      14
-Processing:     1    9   7.4      6     129
-Waiting:        0    8   7.2      6      85
-Total:          1   10   7.5      8     136
+Connect:        0    1   1.6      0      24
+Processing:     1   12  11.4     10     208
+Waiting:        1   12  11.1      9     206
+Total:          1   13  11.6     10     213
 
 Percentage of the requests served within a certain time (ms)
-  50%      8
-  66%      9
-  75%     11
-  80%     13
-  90%     18
-  95%     24
-  98%     34
-  99%     42
- 100%    136 (longest request)
+  50%     10
+  66%     11
+  75%     12
+  80%     14
+  90%     22
+  95%     36
+  98%     49
+  99%     58
+ 100%    213 (longest request)
 
 ```
 Benchmark with Amazon Correto
 
 ```sh
-$ java -version
-openjdk version "11.0.16" 2022-07-19 LTS
-OpenJDK Runtime Environment Corretto-11.0.16.8.1 (build 11.0.16+8-LTS)
-OpenJDK 64-Bit Server VM Corretto-11.0.16.8.1 (build 11.0.16+8-LTS, mixed mode)
+sdk use java 23.0.2-amzn
+Using java version 23.0.2-amzn in this shell.
 ```
-Outputs
+
+```sh
+$ cpulimit -l 20  java -XX:+UnlockExperimentalVMOptions -XX:-UseJVMCICompiler -jar target/BondPricing-0.0.1-SNAPSHOT.jar
+```
+
+
 ```sh 
+ab -n 10000 -c 100  'http://localhost:8080/price/graalvm/100/20?yield=0.01&interestRate=0.05'
+This is ApacheBench, Version 2.3 <$Revision: 1913912 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient)
+Completed 1000 requests
+Completed 2000 requests
+Completed 3000 requests
+Completed 4000 requests
+Completed 5000 requests
+Completed 6000 requests
+Completed 7000 requests
+Completed 8000 requests
+Completed 9000 requests
+Completed 10000 requests
+Finished 10000 requests
+
+
 Server Software:
 Server Hostname:        localhost
 Server Port:            8080
@@ -375,166 +416,120 @@ Document Path:          /price/graalvm/100/20?yield=0.01&interestRate=0.05
 Document Length:        8 bytes
 
 Concurrency Level:      100
-Time taken for tests:   5.282 seconds
+Time taken for tests:   2.449 seconds
 Complete requests:      10000
 Failed requests:        0
 Total transferred:      1400000 bytes
 HTML transferred:       80000 bytes
-Requests per second:    1893.09 [#/sec] (mean)
-Time per request:       52.824 [ms] (mean)
-Time per request:       0.528 [ms] (mean, across all concurrent requests)
-Transfer rate:          258.82 [Kbytes/sec] received
+Requests per second:    4082.73 [#/sec] (mean)
+Time per request:       24.493 [ms] (mean)
+Time per request:       0.245 [ms] (mean, across all concurrent requests)
+Transfer rate:          558.19 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        1   25   8.8     23      82
-Processing:     7   27  11.6     23     156
-Waiting:        7   25  10.0     23     119
-Total:         31   51  14.6     46     158
+Connect:        0    1   2.8      0      22
+Processing:     1   22  13.3     20     173
+Waiting:        1   22  12.8     20     165
+Total:          2   24  12.9     21     173
 
 Percentage of the requests served within a certain time (ms)
-  50%     46
-  66%     50
-  75%     53
-  80%     56
-  90%     71
-  95%     86
-  98%    100
-  99%    102
- 100%    158 (longest request)
-nono-mac
+  50%     21
+  66%     23
+  75%     26
+  80%     28
+  90%     35
+  95%     42
+  98%     62
+  99%     90
+ 100%    173 (longest request)
 ```
 
 GraalVM outperformes both openjdk and Correto JIT for this use case.
 
 |  JIT Performance |<i>Req/sec   |  Time per Req(mean)ms | Overall time (s)  |   |
 |---|---|---|---|---|
-|  GralVM 22.2.0-ee11.0.16  | <b><span style="color:green">2192</span></b>  | <b><span style="color:green">0.456</span>  | <b><span style="color:green">4.562</span> </b> |
-|  Coretto 11.0.16.8.1 |1893.09   | 0.528  | 5.282  |
-|  Open JDK 11.0.16 |  1692.16 |  0.591 |   5.910|
+|   GraalVM 23+37.1  | <b><span style="color:green">14131.36</span></b>  | <b><span style="color:green">7.076</span>  | <b><span style="color:green">0.708</span> </b> |
+|  Coretto Corretto-23.0.2.7.1 |4082.73   | 24.93  | 2.45  |
+|  Open JDK build 23+37-2369 |   7162.87 |  13.961 |   1.396|
 
-Graal JIT compiler accelerates latency, throughput and performs ~22% better than both Corretto 11  JI and OpenJDK JIT. 
+Observations for BondPricing App.
+GraalVM JIT outperformed both Corretto and OpenJDK, handling nearly 3.5x more requests per second than Corretto.
+OpenJDK performed ~75% better than Corretto but still lagged behind GraalVM.
+The mean request time for GraalVM was significantly lower, making it the most efficient option in this test.
+
+
 
 ## Performance Boost with GraalVM Native Image
 
 ### Native Image Build
 To build the native image associated to the application use the command
-<i> - We are skipping tests for this build.</i>
+
+First update (optional) the native-maven-plugin plugin configuration 
+
+```xml
+<plugin>
+                <groupId>org.graalvm.buildtools</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <configuration>
+                    <imageName>BondPricingApp</imageName>
+                    <buildArgs>
+                        <buildArg>-H:+ReportExceptionStackTraces </buildArg>
+                        <buildArg>-march=native</buildArg>
+                        <buildArg>-Os</buildArg>
+                    </buildArgs>
+                </configuration>
+            </plugin>
+```
+
 
 
 ```sh 
-$ mvn package -DskipTests -Pnative
+$  mvn clean package native:compile -Pnative -DskipTests
 
-...
-GraalVM Native Image: Generating 'BondPricing' (executable)...
+....
+ PGO:  Use Profile-Guided Optimizations ('--pgo') for improved throughput.
+ HEAP: Set max heap for improved and more predictable memory usage.
+ QBM:  Use the quick build mode ('-Ob') to speed up builds during development.
+------------------------------------------------------------------------------------------------------------------------
+                       4,4s (8,3% of total time) in 1165 GCs | Peak RSS: 2,93GB | CPU load: 7,41
+------------------------------------------------------------------------------------------------------------------------
+Build artifacts:
+ /Users/enono/Workspace/Java/lab/GraalVM101/01-springboot/BondPricing/target/BondPricingApp (executable)
 ========================================================================================================================
-Warning: Could not register org.springframework.boot.actuate.health.ReactiveHealthEndpointWebExtension: allPublicMethods for reflection. Reason: java.lang.NoClassDefFoundError: reactor/core/publisher/Mono.
-Warning: Could not register org.springframework.boot.autoconfigure.jdbc.HikariDriverConfigurationFailureAnalyzer: allDeclaredConstructors for reflection. Reason: java.lang.NoClassDefFoundError: org/springframework/jdbc/CannotGetJdbcConnectionException.
-Warning: Could not register org.springframework.boot.diagnostics.analyzer.ValidationExceptionFailureAnalyzer: allDeclaredConstructors for reflection. Reason: java.lang.NoClassDefFoundError: javax/validation/ValidationException.
-Warning: Could not register org.springframework.boot.liquibase.LiquibaseChangelogMissingFailureAnalyzer: allDeclaredConstructors for reflection. Reason: java.lang.NoClassDefFoundError: liquibase/exception/ChangeLogParseException.
-[1/7] Initializing...                                                                                    (9,7s @ 0,19GB)
- Version info: 'GraalVM 22.2.0 Java 11 EE'
- Java version info: '11.0.16+11-LTS-jvmci-22.2-b05'
- C compiler: cc (apple, x86_64, 14.0.0)
- Garbage collector: Serial GC
-Warning: Could not register complete reflection metadata for org.springframework.validation.beanvalidation.SpringValidatorAdapter$ViolationFieldError. Reason(s): java.lang.NoClassDefFoundError: javax/validation/Validator
-[2/7] Performing analysis...  [*********]                                                               (39,0s @ 3,77GB)
-  14 904 (90,67%) of 16 437 classes reachable
-  23 701 (69,72%) of 33 994 fields reachable
-  77 921 (65,64%) of 118 716 methods reachable
-     856 classes,   153 fields, and 4 012 methods registered for reflection
-      69 classes,    89 fields, and    56 methods registered for JNI access
-       6 native libraries: -framework CoreServices, -framework Foundation, dl, pthread, stdc++, z
-[3/7] Building universe...                                                                               (5,8s @ 2,34GB)
-[4/7] Parsing methods...      [***]                                                                      (5,8s @ 3,36GB)
-[5/7] Inlining methods...     [***]                                                                      (2,6s @ 1,37GB)
-[6/7] Compiling methods...    [*********]                                                               (77,7s @ 4,99GB)
-[7/7] Creating image...                                                                                  (8,3s @ 3,87GB)
-  36,79MB (57,35%) for code area:    44 529 compilation units
-  27,02MB (42,13%) for image heap:  351 763 objects and 358 resources
- 345,59KB ( 0,53%) for other data
-  64,15MB in total
-------------------------------------------------------------------------------------------------------------------------
-Top 10 packages in code area:                               Top 10 object types in image heap:
-   3,07MB com.oracle.svm.core.code                             7,69MB byte[] for code metadata
-   1,56MB sun.security.ssl                                     3,28MB byte[] for java.lang.String
-   1,29MB java.util                                            3,00MB byte[] for embedded resources
- 864,96KB com.sun.crypto.provider                              2,60MB java.lang.Class
- 685,05KB java.util.concurrent                                 2,48MB java.lang.String
- 670,54KB org.apache.tomcat.util.net                           2,25MB byte[] for general heap data
- 644,53KB java.lang                                          896,43KB byte[] for reflection metadata
- 642,16KB org.apache.coyote.http2                            698,63KB com.oracle.svm.core.hub.DynamicHubCompanion
- 625,53KB org.apache.catalina.core                           453,72KB java.util.HashMap$Node
- 536,46KB sun.security.x509                                  423,06KB c.o.svm.core.hub.DynamicHub$ReflectionMetadata
-  25,98MB for 624 more packages                                3,23MB for 2986 more object types
-------------------------------------------------------------------------------------------------------------------------
-                        5,8s (3,7% of total time) in 56 GCs | Peak RSS: 6,39GB | CPU load: 8,87
-------------------------------------------------------------------------------------------------------------------------
-Produced artifacts:
- /Users/nono/Projects/Workshops/EMEA-HOL-GraalVM22/GraalVM101/BondPricing/target/BondPricing (executable)
- /Users/nono/Projects/Workshops/EMEA-HOL-GraalVM22/GraalVM101/BondPricing/target/BondPricing.build_artifacts.txt (txt)
-========================================================================================================================
-Finished generating 'BondPricing' in 2m 37s.
+Finished generating 'BondPricingApp' in 52,4s.
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  02:52 min
-[INFO] Finished at: 2022-09-19T15:23:16+02:00
-[INFO] ------------------------------------------------------------------------
-nono-mac:BondPricing nono$
+[INFO] Total time:  58.178 s
+[INFO] Finished at: 2025-02-17T14:53:44+01:00
+
 ```
 
-A native `BondPricing` image file is generated
+A native `BondPricingApp` image file is generated
 ```sh
 $ ls -rtlh target/
-total 324272
-drwxr-xr-x  3 nono  staff    96B 19 sep 15:07 generated-sources
-drwxr-xr-x  3 nono  staff    96B 19 sep 15:07 maven-status
-drwxr-xr-x  3 nono  staff    96B 19 sep 15:07 generated-test-sources
-drwxr-xr-x  3 nono  staff    96B 19 sep 15:07 generated-runtime-test-sources
-drwxr-xr-x  4 nono  staff   128B 19 sep 15:07 surefire-reports
-drwxr-xr-x  6 nono  staff   192B 19 sep 15:07 classes
-drwxr-xr-x  3 nono  staff    96B 19 sep 15:07 maven-archiver
--rw-r--r--  1 nono  staff   104K 19 sep 15:07 BondPricing-0.0.1-SNAPSHOT.jar.original
-drwxr-xr-x  3 nono  staff    96B 19 sep 15:08 test-ids
--rwxr-xr-x  1 nono  staff    75M 19 sep 15:11 native-tests
--rw-r--r--  1 nono  staff    27B 19 sep 15:11 native-tests.build_artifacts.txt
-drwxr-xr-x  3 nono  staff    96B 19 sep 15:11 native-test-reports
-drwxr-xr-x  5 nono  staff   160B 19 sep 15:20 test-classes
-drwxr-xr-x  3 nono  staff    96B 19 sep 15:20 generated-runtime-sources
--rw-r--r--  1 nono  staff   104K 19 sep 15:20 BondPricing-0.0.1-SNAPSHOT.jar
--rw-r--r--  1 nono  staff    19M 19 sep 15:20 BondPricing-0.0.1-SNAPSHOT-exec.jar
--rwxr-xr-x  1 nono  staff    64M 19 sep 15:23 BondPricing
--rw-r--r--  1 nono  staff    26B 19 sep 15:23 BondPricing.build_artifacts.txt
+total 170728
+drwxr-xr-x@ 3 enono  staff    96B 17 fév 14:52 graalvm-reachability-metadata
+drwxr-xr-x@ 3 enono  staff    96B 17 fév 14:52 maven-status
+drwxr-xr-x@ 3 enono  staff    96B 17 fév 14:52 generated-sources
+drwxr-xr-x@ 3 enono  staff    96B 17 fév 14:52 test-classes
+drwxr-xr-x@ 3 enono  staff    96B 17 fév 14:52 spring-aot
+drwxr-xr-x@ 6 enono  staff   192B 17 fév 14:52 classes
+drwxr-xr-x@ 3 enono  staff    96B 17 fév 14:52 maven-archiver
+drwxr-xr-x@ 3 enono  staff    96B 17 fév 14:52 generated-test-sources
+-rw-r--r--@ 1 enono  staff   242K 17 fév 14:52 BondPricing-0.0.1-SNAPSHOT.jar.original
+-rw-r--r--@ 1 enono  staff    25M 17 fév 14:52 BondPricing-0.0.1-SNAPSHOT.jar
+-rwxr-xr-x@ 1 enono  staff    58M 17 fév 14:53 BondPricingApp
 ```
 ### Fast startup 
 
 ```sh 
-$ ./target/BondPricing
-2022-09-19 15:42:35.686  INFO 15914 --- [           main] o.s.nativex.NativeListener               : AOT mode enabled
-
-  .   ____          ___ __
- /\\ / ___'___ __(_)_ ____ _\ \ \ \
-( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
-\\/___)| |_)| | | | | || (_| |  ) ) ) )
-  '  |____| .__|_| |_|_| |_\__, | / / / /
- =========|_|==============|___/=/_/_/_/
- :: Spring Boot ::                (v2.7.3)
-
-2022-09-19 15:42:35.688  INFO 15914 --- [           main] c.o.graalvm.demo.BondPricingApplication  : Starting BondPricingApplication v0.0.1-SNAPSHOT using Java 11.0.16 on nono-mac with PID 15914 (/Users/nono/Projects/Workshops/EMEA-HOL-GraalVM22/GraalVM101/BondPricing/target/BondPricing started by nono in /Users/nono/Projects/Workshops/EMEA-HOL-GraalVM22/GraalVM101/BondPricing)
-2022-09-19 15:42:35.688  INFO 15914 --- [           main] c.o.graalvm.demo.BondPricingApplication  : No active profile set, falling back to 1 default profile: "default"
-2022-09-19 15:42:35.724  INFO 15914 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
-2022-09-19 15:42:35.725  INFO 15914 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2022-09-19 15:42:35.725  INFO 15914 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.65]
-2022-09-19 15:42:35.731  INFO 15914 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2022-09-19 15:42:35.731  INFO 15914 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 43 ms
-2022-09-19 15:42:35.733  WARN 15914 --- [           main] i.m.c.i.binder.jvm.JvmGcMetrics          : GC notifications will not be available because MemoryPoolMXBeans are not provided by the JVM
-2022-09-19 15:42:35.760  INFO 15914 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
-2022-09-19 15:42:35.762  INFO 15914 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
-2022-09-19 15:42:35.762  INFO 15914 --- [           main] c.o.graalvm.demo.BondPricingApplication  : Started BondPricingApplication in 0.134 seconds (JVM running for 0.136)
-
+$ cpulimit -l 20   ./target/BondPricingApp
+h context path '/'
+2025-02-17T14:55:52.374+01:00  INFO 77573 --- [BondPricing] [           main] c.o.graalvm.demo.BondPricingApplication  : Started BondPricingApplication in 0.053 seconds (process running for 0.074)
 ```
-The native image build starts very fast <b><span style="color:green">0.134s</span></b> compared to <span style="color:orange">2 seconds </span>2 in tthe [JIT mode](#graalvm-jit)
+The native image build starts very fast <b><span style="color:green">0.053</span></b> compared to <span style="color:orange">0.836 seconds </span>2 in tthe [JIT mode](#graalvm-jit)
 
 
 ## Cloud Native Devployment
@@ -600,90 +595,15 @@ tomcat_sessions_rejected_sessions_total 0.0
 ```sh
 $ cd k8s
 ```
-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
-https://github.com/nelvadas/GraalVM101.git
-
 
 ### Natime image patterns
 
-#### Build a native image 
-From Oracle linux station, build a new native image. 
-```sh
-$ mvn clean package -Pnative
-...
-GraalVM Native Image: Generating 'BondPricing' (executable)...
-========================================================================================================================
+#### Build Fully static  native image 
 
-[1/7] Initializing...                                                                                   (14.1s @ 0.20GB)
- Version info: 'GraalVM 22.2.0 Java 11 EE'
- Java version info: '11.0.16+11-LTS-jvmci-22.2-b05'
- C compiler: gcc (redhat, x86_64, 8.5.0)
- Garbage collector: Serial GC
-Warning: Could not register complete reflection metadata for org.springframework.validation.beanvalidation.SpringValidatorAdapter$ViolationFieldError. Reason(s): java.lang.NoClassDefFoundError: javax/validation/Validator
-[2/7] Performing analysis...  [*********]                                                              (122.5s @ 2.24GB)
-  14,930 (90.53%) of 16,491 classes reachable
-  23,717 (69.67%) of 34,041 fields reachable
-  78,092 (65.56%) of 119,121 methods reachable
-     856 classes,   153 fields, and 4,014 methods registered for reflection
-      69 classes,    88 fields, and    56 methods registered for JNI access
-       5 native libraries: dl, pthread, rt, stdc++, z
-[3/7] Building universe...                                                                              (15.6s @ 1.55GB)
-[4/7] Parsing methods...      [****]                                                                    (19.4s @ 1.39GB)
-[5/7] Inlining methods...     [***]                                                                      (6.9s @ 1.87GB)
-[6/7] Compiling methods...    [[6/7] Compiling methods...    [*****************]                                                      (299.2s @ 1.29GB)
-[7/7] Creating image...                                                                                  (9.9s @ 1.86GB)
-  36.82MB (57.18%) for code area:    44,615 compilation units
-  27.03MB (41.97%) for image heap:  351,708 objects and 358 resources
- 559.02KB ( 0.85%) for other data
-  64.39MB in total
-------------------------------------------------------------------------------------------------------------------------
-Top 10 packages in code area:                               Top 10 object types in image heap:
-   3.07MB com.oracle.svm.core.code                             7.69MB byte[] for code metadata
-   1.57MB sun.security.ssl                                     3.29MB byte[] for java.lang.String
-   1.29MB java.util                                            2.99MB byte[] for embedded resources
- 865.01KB com.sun.crypto.provider                              2.60MB java.lang.Class
- 685.25KB java.util.concurrent                                 2.48MB java.lang.String
- 673.54KB org.apache.tomcat.util.net                           2.25MB byte[] for general heap data
- 638.37KB org.apache.coyote.http2                            897.66KB byte[] for reflection metadata
- 633.08KB java.lang                                          699.84KB com.oracle.svm.core.hub.DynamicHubCompanion
- 622.60KB org.apache.catalina.core                           453.91KB java.util.HashMap$Node
- 536.46KB sun.security.x509                                  423.72KB c.o.svm.core.hub.DynamicHub$ReflectionMetadata
-  26.02MB for 626 more packages                                3.22MB for 2985 more object types
-------------------------------------------------------------------------------------------------------------------------
-                       19.0s (3.8% of total time) in 106 GCs | Peak RSS: 3.88GB | CPU load: 1.93
-------------------------------------------------------------------------------------------------------------------------
-Produced artifacts:
- /home/opc/GraalVM101/BondPricing/target/BondPricing (executable)
- /home/opc/GraalVM101/BondPricing/target/BondPricing.build_artifacts.txt (txt)
-========================================================================================================================
-Finished generating 'BondPricing' in 8m 17s.
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time: 18:48 min
-[INFO] Finished at: 2022-09-19T19:11:17Z
-[INFO] ------------------------------------------------------------------------
-[opc@enono-workstation-01 BondPricing]$ ls -rtlh target/
-total 158M
-drwxrwxr-x. 3 opc opc   25 Sep 19 18:52 generated-sources
-drwxrwxr-x. 3 opc opc   35 Sep 19 18:52 maven-status
-drwxrwxr-x. 3 opc opc   30 Sep 19 18:52 generated-test-sources
-drwxrwxr-x. 3 opc opc   24 Sep 19 18:52 generated-runtime-test-sources
-drwxrwxr-x. 5 opc opc   69 Sep 19 18:53 test-classes
-drwxrwxr-x. 2 opc opc  121 Sep 19 18:53 surefire-reports
-drwxrwxr-x. 2 opc opc   63 Sep 19 18:53 test-ids
--rwxrwxr-x. 1 opc opc  75M Sep 19 19:02 native-tests
--rw-rw-r--. 1 opc opc   27 Sep 19 19:02 native-tests.build_artifacts.txt
-drwxrwxr-x. 2 opc opc   36 Sep 19 19:02 native-test-reports
-drwxrwxr-x. 3 opc opc   24 Sep 19 19:02 generated-runtime-sources
-drwxrwxr-x. 5 opc opc   74 Sep 19 19:02 classes
-drwxrwxr-x. 2 opc opc   28 Sep 19 19:02 maven-archiver
--rw-rw-r--. 1 opc opc 105K Sep 19 19:02 BondPricing-0.0.1-SNAPSHOT.jar
--rw-rw-r--. 1 opc opc  20M Sep 19 19:02 BondPricing-0.0.1-SNAPSHOT-exec.jar
--rwxrwxr-x. 1 opc opc  65M Sep 19 19:11 BondPricing
--rw-rw-r--. 1 opc opc   26 Sep 19 19:11 BondPricing.build_artifacts.txt
-[opc@enono-workstation-01 BondPricing]$
-```
+```sh
+docker build -f docker/Dockerfile.aot.ol8.graal23 -t  ghcr.io/nelvadas/bondpricing:2.0.0-spring-aot-graal23  .
+
+
 
 #### Optimizing package size
 Package size can be optimized using upx 

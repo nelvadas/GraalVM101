@@ -1,0 +1,41 @@
+FROM container-registry.oracle.com/graalvm/native-image:23.0.2-muslib-ol8 as builder
+
+# Install tar and gzip to extract the Maven binaries
+ENV MAVEN_VERSION=3.9.9
+ENV MAVEN_HOME=/opt/maven
+ENV PATH="${MAVEN_HOME}/bin:${PATH}"
+
+
+RUN microdnf update \
+ && microdnf install --nodocs \
+    tar \
+    gzip \
+ && microdnf clean all \
+ && rm -rf /var/cache/yum
+
+
+
+# Install required dependencies
+RUN  curl -fsSL https://downloads.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz | tar -xz -C /opt && \
+    mv /opt/apache-maven-${MAVEN_VERSION} ${MAVEN_HOME} 
+
+# Verify installation
+RUN mvn -version
+
+# Set the working directory to /home/app
+WORKDIR /build
+
+# Copy the source code into the image for building
+COPY . /build
+
+# Build
+RUN mvn clean package native:compile -Pnative-static -X -DskipTests -e
+
+
+
+# The deployment Image
+FROM scratch
+EXPOSE 8080
+# Copy the native executable into the containers
+COPY --from=builder /build/target/BondPricingApp .
+ENTRYPOINT ["/BondPricingApp"]

@@ -600,9 +600,9 @@ Comment updated
 ### Natime image patterns
 
 #### Build Fully static  native image 
-
 ```sh
 docker build -f docker/Dockerfile.aot.ol8.graal23 -t  ghcr.io/nelvadas/bondpricing:2.0.0-spring-aot-graal23  .
+```
 
 
 

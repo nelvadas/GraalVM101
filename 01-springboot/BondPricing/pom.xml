@@ -60,7 +60,6 @@
                     <imageName>BondPricingApp</imageName>
                     <buildArgs>
                         <buildArg>-H:+ReportExceptionStackTraces </buildArg>
-                        <buildArg>-march=native</buildArg>
 						<buildArg>-Os --verbose</buildArg>
                     </buildArgs>
                 </configuration>
@@ -87,7 +86,6 @@
                 
                     <buildArgs>
                         <buildArg>-H:+ReportExceptionStackTraces </buildArg>
-                        <buildArg>-march=native</buildArg>
 						<buildArg>-Os --verbose</buildArg>
                     </buildArgs>
                 </configuration>

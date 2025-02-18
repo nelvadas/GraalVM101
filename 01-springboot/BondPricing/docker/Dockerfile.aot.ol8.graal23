@@ -1,4 +1,4 @@
-FROM container-registry.oracle.com/graalvm/native-image:23.0.2-muslib-ol8 as builder
+FROM container-registry.oracle.com/graalvm/native-image:23-muslib-ol8 as builder
 
 # Install tar and gzip to extract the Maven binaries
 ENV MAVEN_VERSION=3.9.9
@@ -38,7 +38,7 @@ RUN mvn clean package native:compile -Pnative -DskipTests -X
 
 
 # The deployment Image
-FROM scratch
+FROM docker.io/oraclelinux:8-slim
 EXPOSE 8080
 # Copy the native executable into the containers
 COPY --from=builder /build/target/BondPricingApp .

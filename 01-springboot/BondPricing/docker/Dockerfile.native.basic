@@ -4,5 +4,5 @@ FROM docker.io/oraclelinux:8-slim
 EXPOSE 8080
 
 # Copy the native executable into the containers
-COPY ../target/BondPricing.upx ./app
+COPY ../target/BondPricingApp.upx ./app
 ENTRYPOINT ["/app"]

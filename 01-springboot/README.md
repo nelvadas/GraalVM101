@@ -475,7 +475,6 @@ First update (optional) the native-maven-plugin plugin configuration
                     <imageName>BondPricingApp</imageName>
                     <buildArgs>
                         <buildArg>-H:+ReportExceptionStackTraces </buildArg>
-                        <buildArg>-march=native</buildArg>
                         <buildArg>-Os</buildArg>
                     </buildArgs>
                 </configuration>

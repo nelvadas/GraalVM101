@@ -543,7 +543,7 @@ $ podman login container-registry.oracle.com -u $OCR_USER  -p $OCR_TOKEN
 
 Connect to Github Container Registry 
 ```sh
-$ podman login ghcr.io -u $GHCR_USER  -p $OCR_TOKEN
+$ podman login ghcr.io -u $GHCR_USER  -p $GHCR_TOKEN
 sh 
 
 
@@ -588,83 +588,119 @@ tomcat_sessions_rejected_sessions_total 0.0
 ```
 
 
-
-#### Deploy a JIT container on Kubernetes
-
-```sh
-$ cd k8s
-```
-Comment updated
-
 ### Natime image patterns
+On a Linux Workstation , Build the native image using 
 
-#### Build Fully static  native image 
 ```sh
-docker build -f docker/Dockerfile.aot.ol8.graal23 -t  ghcr.io/nelvadas/bondpricing:2.0.0-spring-aot-graal23  .
-```
+mvn clean package native:compile -Pnative -DskipTests
 
+
+ - Use '--enable-sbom' to assemble a Software Bill of Materials (SBOM).
+------------------------------------------------------------------------------------------------------------------------
+Recommendations:
+ G1GC: Use the G1 GC ('--gc=G1') for improved latency and throughput.
+ PGO:  Use Profile-Guided Optimizations ('--pgo') for improved throughput.
+ HEAP: Set max heap for improved and more predictable memory usage.
+ CPU:  Enable more CPU features with '-march=native' for improved performance.
+ QBM:  Use the quick build mode ('-Ob') to speed up builds during development.
+------------------------------------------------------------------------------------------------------------------------
+                       37.9s (8.4% of total time) in 2368 GCs | Peak RSS: 3.16GB | CPU load: 0.96
+------------------------------------------------------------------------------------------------------------------------
+Build artifacts:
+ /home/opc/GraalVM101/01-springboot/BondPricing/target/BondPricingApp (executable)
+========================================================================================================================
+Finished generating 'BondPricingApp' in 7m 28s.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  07:54 min
+[INFO] Finished at: 2025-02-18T10:19:40Z
+[INFO] ------------------------------------------------------------------------
+[opc@enono-bastion BondPricing]$
+
+```
 
 
 #### Optimizing package size
 Package size can be optimized using upx 
 
+
 ```sh
-$curl --location --output upx-3.96-amd64_linux.tar.xz "https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux.tar.xz"
-$tar -xJf upx-3.96-amd64_linux.tar.xz
-$sudo mv upx-3.96-amd64_linux/upx /bin/
+$curl --location --output upx-4.2.4-amd64_linux.tar.xz "https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-amd64_linux.tar.xz"
+$tar -xJf upx-4.2.4-amd64_linux.tar.xz
+$sudo mv upx-4.2.4-amd64_linux/upx /bin/upx
 ```
 
+Check the current binary size 
+
+```sh
+[opc@enono-bastion BondPricing]$ ls -rtlh ./target/
+total 80M
+drwxrwxr-x. 3 opc opc   54 Feb 18 10:11 graalvm-reachability-metadata
+drwxrwxr-x. 3 opc opc   35 Feb 18 10:11 maven-status
+drwxrwxr-x. 3 opc opc   25 Feb 18 10:11 generated-sources
+drwxrwxr-x. 3 opc opc   17 Feb 18 10:11 test-classes
+drwxrwxr-x. 3 opc opc   18 Feb 18 10:11 spring-aot
+drwxrwxr-x. 5 opc opc   74 Feb 18 10:11 classes
+drwxrwxr-x. 2 opc opc   28 Feb 18 10:12 maven-archiver
+drwxrwxr-x. 3 opc opc   30 Feb 18 10:12 generated-test-sources
+-rw-rw-r--. 1 opc opc 242K Feb 18 10:12 BondPricing-0.0.1-SNAPSHOT.jar.original
+-rw-rw-r--. 1 opc opc  25M Feb 18 10:12 BondPricing-0.0.1-SNAPSHOT.jar
+-rwxrwxr-x. 1 opc opc  55M Feb 18 10:19 BondPricingApp
+```
 
 Reduce the package size with upx util
 
 ```sh 
-$ [opc@enono-workstation-01 target]$ upx -o BondPricing.upx BondPricing
+[opc@enono-bastion BondPricing]$ upx -o ./target/BondPricingApp.upx ./target/BondPricingApp
                        Ultimate Packer for eXecutables
-                          Copyright (C) 1996 - 2020
-UPX 3.96        Markus Oberhumer, Laszlo Molnar & John Reiser   Jan 23rd 2020
+                          Copyright (C) 1996 - 2024
+UPX 4.2.4       Markus Oberhumer, Laszlo Molnar & John Reiser    May 9th 2024
 
         File size         Ratio      Format      Name
    --------------------   ------   -----------   -----------
-  67348096 ->  22634004   33.61%   linux/amd64   BondPricing.upx
+  57219152 ->  20351316   35.57%   linux/amd64   BondPricingApp.upx
 
 Packed 1 file.
 ```
-Native image reduce from <b>65M</b> to <b>22M</b>
+Native image reduce from <b>55M</b> to <b>20M</b>
+
+```sh
+[opc@enono-bastion BondPricing]$ ls -rtlh ./target/BondPricingApp*
+-rwxrwxr-x. 1 opc opc 20M Feb 18 10:19 ./target/BondPricingApp.upx
+-rwxrwxr-x. 1 opc opc 55M Feb 18 10:19 ./target/BondPricingApp
+```
 
 
 ### Embark the compressed native image in the container
 Build a new docker image
 
 ```sh
-$ docker build -f docker/Dockerfile.native.basic -t nelvadas/bondpricing:1.0-native-basic .
-Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
-STEP 1/4: FROM docker.io/oraclelinux:8-slim
+$ podman build -f docker/Dockerfile.native.basic -t ghcr.io/nelvadas/bondpricing:2.0.0-spring-aot-graal23-x86_64 .
+TEP 1/4: FROM docker.io/oraclelinux:8-slim
 STEP 2/4: EXPOSE 8080
---> Using cache 8981b8fbcafd16e8c6094ffd0a1f965e95ab741b4309d95a12e88d95c20dd961
---> 8981b8fbcaf
-STEP 3/4: COPY ../target/BondPricing.upx ./app
---> Using cache c7b5c603c83ce1d401f00656eebaee6f735ad03d3f7e99ad8b5e99aac75114f3
---> c7b5c603c83
+--> Using cache e6e49b6bd521685f7e8c8e210354394f48912dcd084f470e5fdd07219c659363
+--> e6e49b6bd521
+STEP 3/4: COPY ../target/BondPricingApp.upx /app
+--> 24ad54e856e3
 STEP 4/4: ENTRYPOINT ["/app"]
---> Using cache b16f2016d9be5477ec7d665bb0ed7ba65815de6323d3f5d6bfc83cd4776f7be6
-COMMIT nelvadas/bondpricing:1.0-native-basic
---> b16f2016d9b
-Successfully tagged localhost/nelvadas/bondpricing:1.0-native-basic
+COMMIT ghcr.io/nelvadas/bondpricing:2.0.0-spring-aot-graal23-x86_64
+--> 3031073aef68
+Successfully tagged ghcr.io/nelvadas/bondpricing:2.0.0-spring-aot-graal23-x86_64
+3031073aef68d8f8a466de46a5db75b3cd923dfe18f1f3964263548cc5566add
 ```
 
 Run a container built on top of Native Image executable 
 
 ```sh 
-[opc@enono-workstation-01 BondPricing]$ docker run -d -p 7070:8080 nelvadas/bondpricing:1.0-native-basic
-Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
-c91348f823e5de9b44b93f7e8539585fa62891d90cfa949e6193481c5a672afa
-[opc@enono-workstation-01 BondPricing]$ docker ps
-Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
-CONTAINER ID  IMAGE                                            COMMAND     CREATED        STATUS            PORTS                   NAMES
-c91348f823e5  localhost/nelvadas/bondpricing:1.0-native-basic              2 seconds ago  Up 3 seconds ago  0.0.0.0:7070->8080/tcp  epic_leavitt
-[opc@enono-workstation-01 BondPricing]$ docker logs c9
-Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
-2022-09-19 19:25:29.243  INFO 1 --- [           main] o.s.nativex.NativeListener               : AOT mode enabled
+[opc@enono-workstation-01 BondPricing]$ podman run -d -p 7070:8080 ghcr.io/nelvadas/bondpricing:2.0.0-spring-aot-graal23-x86_64
+a719142924904a2d3eea280efb5be1b924d70993df8082a5bb7b6266b5820fca
+```
+
+Check logs 
+
+```sh
+[opc@enono-bastion BondPricing]$ podman logs a719
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -672,43 +708,141 @@ Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
   '  |____| .__|_| |_|_| |_\__, | / / / /
  =========|_|==============|___/=/_/_/_/
- :: Spring Boot ::                (v2.7.3)
 
-2022-09-19 19:25:29.244  INFO 1 --- [           main] c.o.graalvm.demo.BondPricingApplication  : Starting BondPricingApplication v0.0.1-SNAPSHOT using Java 11.0.16 on c91348f823e5 with PID 1 (/app started by root in /)
-2022-09-19 19:25:29.244  INFO 1 --- [           main] c.o.graalvm.demo.BondPricingApplication  : No active profile set, falling back to 1 default profile: "default"
-2022-09-19 19:25:29.254  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
-2022-09-19 19:25:29.254  INFO 1 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2022-09-19 19:25:29.254  INFO 1 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.65]
-2022-09-19 19:25:29.257  INFO 1 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2022-09-19 19:25:29.257  INFO 1 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 13 ms
-2022-09-19 19:25:29.259  WARN 1 --- [           main] i.m.c.i.binder.jvm.JvmGcMetrics          : GC notifications will not be available because MemoryPoolMXBeans are not provided by the JVM
-2022-09-19 19:25:29.282  INFO 1 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
-2022-09-19 19:25:29.284  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
-2022-09-19 19:25:29.284  INFO 1 --- [           main] c.o.graalvm.demo.BondPricingApplication  : Started BondPricingApplication in 0.048 seconds (JVM running for 0.049)
+ :: Spring Boot ::                (v3.4.2)
+
+2025-02-18T10:36:00.846Z  INFO 1 --- [BondPricing] [           main] c.o.graalvm.demo.BondPricingApplication  : Starting AOT-processed BondPricingApplication using Java 23 with PID 1 (/app started by root in /)
+2025-02-18T10:36:00.847Z  INFO 1 --- [BondPricing] [           main] c.o.graalvm.demo.BondPricingApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-02-18T10:36:00.857Z  INFO 1 --- [BondPricing] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-02-18T10:36:00.858Z  INFO 1 --- [BondPricing] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-02-18T10:36:00.858Z  INFO 1 --- [BondPricing] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.34]
+2025-02-18T10:36:00.864Z  INFO 1 --- [BondPricing] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-02-18T10:36:00.864Z  INFO 1 --- [BondPricing] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 17 ms
+2025-02-18T10:36:00.893Z  WARN 1 --- [BondPricing] [           main] i.m.c.i.binder.jvm.JvmGcMetrics          : GC notifications will not be available because no GarbageCollectorMXBean of the JVM provides any. GCs=[young generation scavenger, complete scavenger]
+2025-02-18T10:36:00.896Z  INFO 1 --- [BondPricing] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
+2025-02-18T10:36:00.900Z  INFO 1 --- [BondPricing] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'d
+2025-02-18T10:36:00.900Z  INFO 1 --- [BondPricing] [           main] c.o.graalvm.demo.BondPricingApplication  : Started BondPricingApplication in 0.063 seconds (process running for 0.066)
 ```
-Application start very fast. <b>~ (0,048seco~d)</b>
+Application start very fast. <b>~ (0,066seco~d)</b>
 
 The package size produced with the native image build is leaner
 
 ```sh 
-[opc@enono-workstation-01 BondPricing]$ docker images | grep bond
-localhost/nelvadas/bondpricing                1.0-jit-temurin-11.0.16  6adc009e52ad  46 seconds ago  960 MB
-localhost/nelvadas/bondpricing                1.0-native-basic         b16f2016d9be  4 minutes ago   130 MB
-[opc@enono-workstation-01 BondPricing]$
+[opc@enono-bastion BondPricing]$ docker images | grep bond
+ghcr.io/nelvadas/bondpricing                        2.0.0-spring-aot-graal23-x86_64    3031073aef68  About a minute ago  138 MB
+ghcr.io/nelvadas/bondpricing                        2.0.0-spring-jit-openjdk23-x86_64  66b3867916b4  3 days ago          548 MB
+ghcr.io/nelvadas/bondpricing                        2.0.0-spring-jit-openjdk23         66b3867916b4  3 days ago          548 MB
 ```
 
 The docker images are available as packages on the current repository 
 ```sh
-docker pull ghcr.io/nelvadas/bondpricing:1.0-native-basic
-docker pull ghcr.io/nelvadas/bondpricing:1.0-jit-temurin-11.0.16
+docker pull ghcr.io/nelvadas/bondpricing:2.0.0-spring-jit-openjdk23-x86_64
+docker pull ghcr.io/nelvadas/bondpricing:2.0.0-spring-aot-graal23-x86_64
 ```
 
 ### Graphana Live Metrics dashboard
-:todo:
+
+
+#### Deploy a JIT container on Kubernetes
+Access to a kubernetes cluster is required to complete the following part.
+
+```sh
+$ cd k8s
+```
+For AOT just run the following script that create various K8S resources 
+Adjust the ingress to match your domain URL
+```sh
+BondPricing/k8s/spring-aot on  main [!?] on ☁️  (us-east-2)
+❯ kubectl apply -f resources.yaml
+namespace/bondpricer-spring-aot unchanged
+deployment.apps/bondpricer unchanged
+service/bondpricer-svc unchanged
+ingress.networking.k8s.io/bondpricer-ing configured
+```
+
+Do the same in subfloder BondPricing/k8s/spring-jit to create the associated kubernetes resources.
+```sh
+BondPricing/k8s/spring-jit on  main [!?] on ☁️  (us-east-2)
+❯ kubectl apply -f resources.yaml
+namespace/bondpricer-spring-jit configured
+deployment.apps/bondpricer configured
+service/bondpricer-svc unchanged
+ingress.networking.k8s.io/bondpricer-ing configured
+```
+
+```sh
+❯ kubectl get po -n bondpricer-spring-jit
+❯ kubectl get po -n bondpricer-spring-jit
+NAME                          READY   STATUS    RESTARTS   AGE
+bondpricer-6d7488765b-b6qqj   1/1     Running   0          11s
+
+BondPricing/k8s/spring-jit on  main [!?] on ☁️  (us-east-2)
+❯ kubectl get po -n bondpricer-spring-aot
+NAME                          READY   STATUS    RESTARTS   AGE
+bondpricer-5f65dc9bcd-qc4xw   1/1     Running   0          15m
+```
 
 
 
+#### Explore Metrics with Prometheus 
 
+1. Check the startup times
+![](./images/prometheus-startuptime.png)
+using the  PROM QL expression 
+```SQL
+application_started_time_seconds{namespace="bondpricer-spring-aot",service="bondpricer-svc"}
+```
+2. All the metrics available in the namespace of your choice 
+```SQL
+{namespace="bondpricer-spring-jit"}
+```
+3. Memory usage 
+```SQL
+container_memory_usage_bytes{namespace="bondpricer-spring-jit",container="bondpricer"}
+```
+
+4. Avg memory usage by containers in a namespace 
+avg(container_memory_usage_bytes{namespace="bondpricer-spring-aot",container="bondpricer"}
+
+
+5.  Memory improvement
+
+- RSS
+```SQL
+(sum(container_memory_rss{namespace="bondpricer-spring-jit"}) - sum(container_memory_rss{namespace="bondpricer-spring-aot"})) / sum(container_memory_rss{namespace="bondpricer-spring-jit"}) * -100
+```
+
+- Used Bytes
+```SQL
+(avg(container_memory_usage_bytes{namespace="bondpricer-spring-jit",container="bondpricer"})-
+ avg(container_memory_usage_bytes{namespace="bondpricer-spring-aot",container="bondpricer"}))
+ / (avg(container_memory_usage_bytes{namespace="bondpricer-spring-jit"container="bondpricer"})) * -100
+```
+
+
+6. Startup times improvements
+```SQL
+(sum(application_started_time_seconds{namespace="bondpricer-spring-jit"}) - sum(application_started_time_seconds{namespace="bondpricer-spring-aot"})) / sum(application_started_time_seconds{namespace="bondpricer-spring-jit"}) * -100
+```
+
+
+7. Throuputs 
+
+```sh
+hey -z 30m -c 1000 'http://bondpricer.spring.jit.8d94414f.nip.io/price/graalvm-discount_bond/100/3?yield=0.04&interestRate=0.05'
+```
+
+```sh
+hey -z 30m -c 1000  'http://bondpricer.spring.aot.8d94414f.nip.io/price/graalvm-discount_bond/100/3?yield=0.04&interestRate=0.05'
+```
+
+
+
+#### Visualization with Graphana
+
+The following grafana dashboard displays a couple of indicators extracted from Prometheus
+![Grafana view ](./images/grafana-view.png)
+ JSON dashboard available in [Grafana](./BondPricing/grafana/BondPricer%20-%20Spring%20Boot%20JIT%20&%20AOT-1739879914134.json)
 
 # More Readings and Workshops
 
